@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div>
+  {{ macros.m_button_group([['global_setting_save_btn', '설정 저장']])}}
+  {{ macros.m_row_start('5') }}
+  {{ macros.m_row_end() }}
+  <nav>  
+    {{ macros.m_tab_head_start() }}
+      {{ macros.m_tab_head2('normal', '일반', true) }}
+      {{ macros.m_tab_head2('auto', '자동', false) }}
+    {{ macros.m_tab_head_end() }}
+  </nav>
+  <form id='setting' name='setting'>
+  <div class="tab-content" id="nav-tabContent">
+    {{ macros.m_tab_content_start('normal', true) }}
+      {{ macros.setting_input_text('download_path', '다운로드 경로', value=arg['download_path'], desc=['다운로드 경로입니다.']) }}
+      {{ macros.setting_input_text('proc_path', '파일처리 경로', value=arg['proc_path'], desc=['파일처리 경로입니다.']) }}
+      {{ macros.setting_input_text('err_path', '오류파일 경로', value=arg['err_path'], desc=['오류파일 경로입니다.']) }}
+      {{ macros.setting_input_text('maxCost', '전체매칭점수', value=arg['maxCost'], desc=['가수, 제목, 앨범 매칭의 총 점수 기준입니다.','총 점수 300으로 해당 설정 점수로 매칭을 판단합니다.']) }}
+      {{ macros.setting_input_text('singleCost', '단독매칭점수', value=arg['singleCost'], desc=['가수, 제목, 앨범 각각의 매칭점수 입니다.','각 점수 100으로 해당 설정 점수로 매칭을 판단합니다.','전체매칭점수와 단독매칭점수 두 조건의 AND 조건으로 판단합니다.']) }}
+
+      {{ macros.setting_input_text('interval', '건당처리지연시간', value=arg['interval'], desc=['기준단위 : 초','멜론의 경우 너무 빠른 반복조회시 오류가 발행합니다.']) }}
+      {{ macros.setting_checkbox('notMp3delete', 'MP3 파일이 아닌경우 삭제', value=arg['notMp3delete'], desc='On : MP3 파일이 아닌경우 삭제 처리합니다.') }}
+      {{ macros.setting_checkbox('emptyFolderDelete', '빈폴더 삭제', value=arg['emptyFolderDelete'], desc='On : 작업후 빈폴더 삭제') }}
+
+      {{ macros.setting_button([['global_reset_db_btn', '목록 초기화']], left='DB정리' ) }}
+    {{ macros.m_tab_content_end() }}
+    {{ macros.m_tab_content_start('auto', false) }}
+      {{ macros.setting_global_scheduler_button(arg['scheduler'], arg['is_running']) }}
+      {{ macros.setting_input_int('schedulerInterval', '스케쥴링 실행 주기', value=arg['schedulerInterval'], min='1', placeholder='10', desc='minute 단위') }}
+      {{ macros.setting_checkbox('auto_start', '시작시 자동실행', value=arg['auto_start'], desc='On : 시작시 자동으로 스케쥴러에 등록됩니다.') }}
+      {{ macros.setting_button([['global_one_execute_btn', '1회 실행']], left='1회 실행' ) }}
+    {{ macros.m_tab_content_end() }}
+  </div><!--tab-content-->
+</form>
+</div><!--전체-->
+
+<script type="text/javascript">
+var package_name = "{{arg['package_name'] }}";
+var current_data = null;
+
+$(document).ready(function(){
+});
+
+</script>    
+{% endblock %}

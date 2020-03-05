@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block content %}
+ 
+<div>
+  <form id="form_search" class="form-inline" style="text-align:left">
+    <div class="container-fluid">
+      <div class="row show-grid">
+        <span class="col-md-2"></span>
+        <span class="col-md-8">
+          <input id="search_word" name="search_word" class="form-control form-control-sm w-75" type="text" placeholder="" aria-label="Search">
+          <button id="search" class="btn btn-sm btn-outline-success">검색</button>
+          <button id="reset_btn" class="btn btn-sm btn-outline-success">리셋</button>
+        </span>
+        <span class="col-md-2"></span>
+      </div>
+    </div>
+  </form>
+  <div id='page1'></div>
+  {{ macros.m_hr_head_top() }}
+  {{ macros.m_row_start('0') }}
+  <div class="col-sm-2" style="text-align:center; word-break:break-all;">
+    <strong>상태</strong>
+  </div>
+  <div class="col-sm-2" style="text-align:center; word-break:break-all;">
+    <strong>분류</strong>
+  </div>
+  <div class="col-sm-6" style="text-align:center; word-break:break-all;">
+    <strong>정보</strong>
+  </div>
+  <div class="col-sm-2" style="text-align:center; word-break:break-all;">
+    <strong>기능</strong>
+  </div>
+  {{ macros.m_row_end() }}
+  {{ macros.m_hr_head_bottom() }}
+  <div id="list_div"></div>
+  <div id='page2'></div>
+</div>
+
+<script type="text/javascript">
+var package_name = "{{arg['package_name'] }}";
+var current_data = null;
+var dataList = null;
+function request_search(page, move_top=true) {
+  var formData = get_formdata('#form_search')
+  formData += '&page=' + page;
+  $.ajax({
+    url: '/' + package_name + '/ajax/select',
+    type: "POST", 
+    cache: false,
+    data: formData,
+    dataType: "json",
+    success: function (data) {
+      current_data = data;
+      if (move_top)
+        window.scrollTo(0,0);
+      make_list(data.list)
+      make_page_html(data.paging)
+    }
+  });
+}
+
+function make_list(data) {
+  str = '';
+  for (i in data) {
+    str += m_row_start(0);
+    str += '<div class="col-sm-2" style="text-align:center; word-break:break-all;font-weight:bold">';
+    str += data[i].status;
+    str += '</div>';
+    str += '<div class="col-sm-2" style="text-align:center; word-break:break-all;">';
+    str += '<div style="position: inherit;top: 25px;">TAG 정보</div>';
+    str += '<hr style="width: 100%; margin:25px;margin-top: 75px;">';
+    str += '검색결과';
+    str += '</div>';
+    str += '<div class="col-sm-6" style="text-align:left; word-break:break-all;">';
+    str += '파일경로 : ' + data[i].filePath + '<br> ';
+    str += '<hr style="width: 100%; margin:5px;">';
+    str += '제목 : ' + data[i].titleByTag + '<br>';
+    str += '가수 : ' + data[i].artistByTag + '<br>';
+    str += '앨범 : ' + data[i].albumByTag + '<br>';
+    str += '<hr style="width: 100%; margin:5px;">';
+    str += '제목 : ' + data[i].title + '<br>';
+    str += '가수 : ' + data[i].artist + '<br>';
+    str += '앨범 : ' + data[i].album + '<br>';
+    str += '</div>';
+    str += '<div class="col-sm-2" style="text-align:left; word-break:break-all;">';
+    str += m_button('updateTag_btn', 'TAG 수정', [{'key':'id', 'value':data[i].id}]);
+    str += m_button('search_btn', '멜론검색', [{'key':'searchKey', 'value':'사계%20%20태연'}]);
+    str += '</div>';
+    str += m_row_end();
+    if (i != data.length -1) str += m_hr();
+     /*
+    console.log(data[i])
+    
+    str += m_col(2, data[i].status);
+    str += m_col(2, "TAG 정보");
+    
+
+    //tmp = m_button('remove_btn', '삭제', [{'key':'id', 'value':data[i].id}]);
+    //tmp += m_button('go_analyse_btn', '분석', [{'key':'id', 'value':data[i].title_id}]);
+    //tmp += m_button('add_blacklist_btn', '제외 추가', [{'key':'id', 'value':data[i].id}]);
+    //tmp = m_button_group(tmp)
+    //str += m_col(2, tmp)
+    
+    
+    */
+  }
+  dataList = data;
+  document.getElementById("list_div").innerHTML = str;
+}
+
+$(document).ready(function(){
+  request_search('1');
+});
+
+$("#search").click(function(e) {
+  e.preventDefault();
+  request_search('1');
+});
+
+$("body").on('click', '#page', function(e){
+  e.preventDefault();
+  request_search($(this).data('page'));
+});
+
+$("#reset_btn").click(function(e) {
+  e.preventDefault();
+  document.getElementById("search_word").value = '';
+  request_search('1')
+});
+
+
+$("body").on('click', '#search_btn', function(e){
+  var searchKey = $(this).data("searchkey");
+  
+  var url = "https://www.melon.com/search/song/index.htm?q="+searchKey;  
+  window.open(url, "_blank");  
+  
+});
+$("body").on('click', '#updateTag_btn', function(e){
+  e.preventDefault();
+  id = $(this).data("id");
+
+  html = $(this).parent().parent().find(".col-sm-6").html();
+
+  title = "";
+  artist = "";
+  album = "";
+  for( i = 0 ; i < dataList.length ; i++ ){
+    if( id == dataList[i].id ){
+      title = dataList[i].titleByTag;
+      artist = dataList[i].artistByTag;
+      album = dataList[i].albumByTag;
+      dataList[i].html = html;
+    }
+  }
+  str = html.substring(0,html.indexOf("\>제목")+1);
+  str += "<label for='title' style='margin-bottom: 0;'>제목</label> : <input type='text' id='title' name='title' style='display: initial;height: 20px;' class='form-control form-control-sm w-50' value='"+title+"'/><br>";
+  str += "<label for='artist' style='margin-bottom: 0;'>가수</label> : <input type='text' id='artist' name='artist' style='display: initial;height: 20px;' class='form-control form-control-sm w-50' value='"+artist+"'/><br>";
+  str += "<label for='album' style='margin-bottom: 0;'>앨범</label> : <input type='text' id='album' name='album' style='display: initial;height: 20px;' class='form-control form-control-sm w-50' value='"+album+"'/>";
+  str += '<button id="update_btn" name="update_btn" class="btn btn-sm btn-outline-success" style="position: relative;top: -33px;right: -24px;margin-bottom: -24px; margin-left: 3px;" data-id="'+id+'">수정</button>';
+  str += '<button id="cancel_btn" name="cancel_btn" class="btn btn-sm btn-outline-success" style="position: relative;top: -33px;right: -24px;margin-bottom: -24px; margin-left: 3px;" data-id="'+id+'">취소</button><br>';
+  
+  str += html.substring( html.indexOf("\>\<hr ")+1 , html.length )
+  
+  $(this).parent().parent().find(".col-sm-6").html(str);
+  
+  
+  //alert( id );
+  /*
+  $.ajax({
+    url: '/' + package_name + '/ajax/update_tag',
+    type: "POST",
+    cache: false,
+    data: {id:id},
+    dataType: "json",
+    success: function (ret) {
+      if (ret) {
+        $.notify('<strong>삭제하였습니다.</strong>', {
+          type: 'success'
+        });
+        request_search(current_data.paging.current_page, false)
+      } else {
+        $.notify('<strong>삭제 실패</strong>', {
+          type: 'warning'
+        });
+      }
+    }
+  });
+  */
+});
+$("body").on('click', '#update_btn', function(e){
+  e.preventDefault();
+  id = $(this).data("id");
+  title = $(this).parent().find("#title").val();
+  artist = $(this).parent().find("#artist").val();
+  album = $(this).parent().find("#album").val();
+
+  $.ajax({
+    url: '/' + package_name + '/ajax/update_tag',
+    type: "POST",
+    cache: false,
+    data: {id:id,title:title,artist:artist,album:album},
+    dataType: "json",
+    success: function (ret) {
+      //debugger;
+
+      if (ret) {
+        $.notify('<strong>삭제하였습니다.</strong>', {
+          type: 'success'
+        });
+        request_search(current_data.paging.current_page, false)
+      } else {
+        $.notify('<strong>삭제 실패</strong>', {
+          type: 'warning'
+        });
+      }
+    }
+  });
+});
+$("body").on('click', '#cancel_btn', function(e){
+  e.preventDefault();
+  id = $(this).data("id");
+  for( i = 0 ; i < dataList.length ; i++ ){
+    if( id == dataList[i].id ){
+      $(this).parent().html(dataList[i].html);
+    }
+  }
+});
+
+</script>    
+{% endblock %}
