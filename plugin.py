@@ -47,7 +47,7 @@ plugin_info = {
     'category_name' : 'service',
     'developer' : 'dyllis.lev',
     'description' : '음악파일처리',
-    'home' : 'https://github.com/soju6jan/naver_webtoon',
+    'home' : 'https://github.com/dyllisLev/musicProc',
     'more' : '',
 }
 

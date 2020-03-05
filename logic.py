@@ -29,9 +29,9 @@ except:
 class Logic(object):
     db_default = {
         'db_version' : '1',
-        'download_path' : "/app/data/gdriveTeam/JOB/download/music/",
-        'proc_path' : "/app/data/gdriveTeam/JOB/proc/ps1/music/",
-        'err_path' : "/app/data/gdriveTeam/JOB/proc/ps1/music/ERR",
+        'download_path' : os.path.join(path_data, package_name),
+        'proc_path' : os.path.join(path_data, package_name),
+        'err_path' : os.path.join(path_data, package_name),
         'maxCost' : '200',
         'singleCost' : '0',
         'schedulerInterval' : '60',
