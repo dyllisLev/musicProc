@@ -94,7 +94,7 @@ function make_list(data) {
     str += '<div class="col-sm-2" style="text-align:left; word-break:break-all;">';
     str += m_button('updateTag_btn', 'TAG 수정', [{'key':'id', 'value':data[i].id}]);
     str += m_button('search_btn', '멜론검색', [{'key':'searchKey', 'value':data[i].searchKey}]);
-    str += '</div>';
+    str += '</div>'; 
     str += m_row_end();
     if (i != data.length -1) str += m_hr();
      /*
