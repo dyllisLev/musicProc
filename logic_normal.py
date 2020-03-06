@@ -194,7 +194,7 @@ class LogicNormal(object):
         entity['titleByTag'] = titleByTag
         entity['artistByTag'] = artistByTag
         entity['albumByTag'] = albumByTag
-        entity['searchKey'] = searchKey
+        entity['searchKey'] = searchKey 
         entity['filePath'] = file
         ModelItem.save_as_dict(entity)
     
