@@ -41,7 +41,10 @@ class Logic(object):
         #'err_path' : os.path.join(path_data, package_name),
         'auto_start' : 'False',
         'emptyFolderDelete' : 'False',
-        'notMp3delete' : 'False'
+        'notMp3delete' : 'False',
+        'folderStructure' : '%artist%/%album%/',
+        'fileRename' : 'False',
+        'fileRenameSet' : '%title% - %artist%'
 
     }
 

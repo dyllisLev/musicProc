@@ -180,7 +180,7 @@ class LogicNormal(object):
         #logger.debug("신규 파일경로명 :" + newFilePath) 
         #logger.debug("파일명체크 종료")
         logger.debug(originPath + " ===>> " + newFilePath)
-        #os.rename(originPath, newFilePath)
+        os.rename(originPath, newFilePath)
         logger.debug("파일이동 완료")
         return newFilePath.replace("//","/")
     @staticmethod
@@ -208,6 +208,10 @@ class LogicNormal(object):
         singleCost = ModelSetting.get('singleCost')
         
         notMp3delete = ModelSetting.get('notMp3delete')
+
+        folderStructure = ModelSetting.get('folderStructure')
+        fileRename = ModelSetting.get('fileRename')
+        fileRenameSet = ModelSetting.get('fileRenameSet')
         
 
         ext = file.split(".")[-1]
@@ -337,8 +341,18 @@ class LogicNormal(object):
                         artist = li.get('d-artistname').strip()
                         album = li.get('d-albumname').strip()
 
-                        newFolderPath = organize_path+"/"+artist+"/"+album
-                        newFilePath = organize_path+"/"+artist+"/"+album+"/"+title+" - "+artist+".mp3"
+                        folderStructure = folderStructure.replace('%title%', title)
+                        folderStructure = folderStructure.replace('%artist%', artist)
+                        folderStructure = folderStructure.replace('%album%', album)
+                        newFolderPath = organize_path+"/"+folderStructure
+
+                        if fileRename == "True":
+                            fileRenameSet = fileRenameSet.replace('%title%', title)
+                            fileRenameSet = fileRenameSet.replace('%artist%', artist)
+                            fileRenameSet = fileRenameSet.replace('%album%', album)
+                            fileRenameSet = newFolderPath +"/"+fileRenameSet
+                        
+                        newFilePath = newFolderPath+"/"+fileRenameSet+".mp3"
                         newFolderPath = newFolderPath.replace('"',"'")
                         
                         match = True
