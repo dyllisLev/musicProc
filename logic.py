@@ -16,7 +16,7 @@ from framework.util import Util
 
 # 패키지
 from .plugin import logger, package_name
-from .model import ModelSetting
+from .model import ModelSetting, ModelItem
 
 try:
     from .logic_normal import LogicNormal
@@ -179,7 +179,7 @@ class Logic(object):
     @staticmethod
     def migration():
         try:
-            pass
+            ModelItem.migration()
         except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())

@@ -17,6 +17,7 @@ from framework.util import Util
 # 패키지
 from .plugin import logger, package_name
 from downloader import ModelDownloaderItem
+from sqlalchemy import create_engine
 
 app.config['SQLALCHEMY_BINDS'][package_name] = 'sqlite:///%s' % (os.path.join(path_app_root, 'data', 'db', '%s.db' % package_name))
 #########################################################
@@ -124,6 +125,7 @@ class ModelItem(db.Model):
     artistByTag = db.Column(db.String)
     albumByTag = db.Column(db.String)
     filePath = db.Column(db.String)
+    searchKey = db.Column(db.String)
     #inqueue_time = db.Column(db.DateTime)
     #start_time = db.Column(db.DateTime)
     #end_time = db.Column(db.DateTime)
@@ -161,6 +163,7 @@ class ModelItem(db.Model):
             entity.artistByTag = unicode(d['artistByTag'])
             entity.albumByTag = unicode(d['albumByTag'])
             entity.filePath = unicode(d['filePath'])
+            entity.searchKey = unicode(d['searchKey'])
             db.session.add(entity)
             db.session.commit()
         except Exception as e:
@@ -175,6 +178,7 @@ class ModelItem(db.Model):
             page_size = 30
             job_id = ''
             search = ''
+            option = req.form['option']
             if 'page' in req.form:
                 page = int(req.form['page'])
             if 'search_word' in req.form:
@@ -182,6 +186,8 @@ class ModelItem(db.Model):
             query = db.session.query(class_is)
             if search != '':
                 query = query.filter(class_is.title.like('%'+search+'%'))
+            if option != 'all':
+                query = query.filter(class_is.status.like('%'+option+'%'))
             query = query.order_by(desc(class_is.id))
             count = query.count()
             query = query.limit(page_size).offset((page-1)*page_size)
@@ -201,95 +207,30 @@ class ModelItem(db.Model):
         except Exception, e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
-    """
+    
     @staticmethod
-    def update(req):
+    def migration():
         try:
-            id = ""
-            title = ""
-            artist = ""
-            album = ""
-            if 'id' in req.form:
-                id = int(req.form['id'])
-            if 'title' in req.form:
-                title = str(req.form['title'])
-            if 'artist' in req.form:
-                artist = str(req.form['artist'])
-            if 'album' in req.form:
-                album = str(req.form['album'])
-            
-            logger.debug('id : ' + str(id))
-            logger.debug('title : ' + str(title))
-            logger.debug('artist : ' + str(artist))
-            logger.debug('album : ' + str(album))
-            
-            entity = db.session.query(ModelItem).filter_by(id=id).with_for_update().first()
-            filePath = entity.filePath
-            LogicNormal.tagUpdate(filePath, title, artist, album)
-            
-            
-            ret = {}
-            ret['title'] = "test"
-            return ret
+            logger.debug( "migration !!")
+
+            # application starts
+            from sqlalchemy.orm import sessionmaker
+            Session = sessionmaker()
+            engine = create_engine(app.config['SQLALCHEMY_BINDS'][package_name])
+            Session.configure(bind=engine)
+
+            sess = Session()
+            query = sess.execute("SELECT * FROM musicProc_item")
+            if "searchKey" in query.keys():
+                logger.debug( "포함")
+            else:
+                logger.debug( "미포함")
+                sess.execute('ALTER TABLE musicProc_item ADD COLUMN searchKey VARCHAR')
             
         except Exception, e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
-    
-    def as_dict(self):
-        ret = {x.name: getattr(self, x.name) for x in self.__table__.columns}
-        ret['created_time'] = self.created_time.strftime('%m-%d %H:%M:%S') 
-        ret['inqueue_time'] = self.inqueue_time.strftime('%m-%d %H:%M:%S') if self.inqueue_time is not None else None
-        #ret['start_time'] = self.start_time.strftime('%m-%d %H:%M:%S') if self.start_time is not None else None
-        #ret['end_time'] = self.end_time.strftime('%m-%d %H:%M:%S') if self.end_time is not None else None
 
-        return ret
 
-    @staticmethod
-    def init(title_id, episode_id):
-        try:
-            entity = db.session.query(ModelItem).filter_by(title_id=title_id).filter_by(episode_id=episode_id).first()
-            if entity is None:
-                entity = ModelItem(title_id, episode_id)
-                entity.inqueue_time = datetime.now()
-                db.session.add(entity)
-                db.session.commit()
-            #else:
-            #    if entity.status > 10:
-            #        return None
-            return entity.as_dict()
-        except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
 
-    @staticmethod
-    def get_list(by_dict=False):
-        try:
-            tmp = db.session.query(ModelItem).all()
-            if by_dict:
-                tmp = [x.as_dict() for x in tmp]
-            return tmp
-        except Exception, e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-
-    
-    
-
-    @staticmethod
-    def delete(req):
-        try:
-            class_is = ModelItem
-            db_id = int(req.form['id'])
-            item = db.session.query(class_is).filter_by(id=db_id).first()
-            if item is not None:
-                db.session.delete(item)
-                db.session.commit()
-            return True
-        except Exception, e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-            return False
-
-    
-    """
+            

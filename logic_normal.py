@@ -180,11 +180,11 @@ class LogicNormal(object):
         #logger.debug("신규 파일경로명 :" + newFilePath) 
         #logger.debug("파일명체크 종료")
         logger.debug(originPath + " ===>> " + newFilePath)
-        os.rename(originPath, newFilePath)
+        #os.rename(originPath, newFilePath)
         logger.debug("파일이동 완료")
         return newFilePath.replace("//","/")
     @staticmethod
-    def procSave(status , title, artist, album, titleByTag, artistByTag, albumByTag, file):
+    def procSave(status , title, artist, album, titleByTag, artistByTag, albumByTag, searchKey, file):
         entity = {}
         entity['id'] = ""
         entity['status'] = status
@@ -194,6 +194,7 @@ class LogicNormal(object):
         entity['titleByTag'] = titleByTag
         entity['artistByTag'] = artistByTag
         entity['albumByTag'] = albumByTag
+        entity['searchKey'] = searchKey
         entity['filePath'] = file
         ModelItem.save_as_dict(entity)
     
@@ -225,7 +226,7 @@ class LogicNormal(object):
                     #logger.debug( "newFilePath : " + newFilePath)
                     #logger.debug( "newFolderPath : " + newFolderPath)
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                    LogicNormal.procSave("태그정보 없음." , "", "", "", "", "", "", realFilePath)
+                    LogicNormal.procSave("태그정보 없음." , "", "", "", "", "", "", "", realFilePath)
                     return
 
 
@@ -249,7 +250,7 @@ class LogicNormal(object):
                     #logger.debug( "newFilePath : " + newFilePath)
                     #logger.debug( "newFolderPath : " + newFolderPath)
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                    LogicNormal.procSave("태그정보 없음." , "", "", "", "", "", "", realFilePath)
+                    LogicNormal.procSave("태그정보 없음." , "", "", "", "", "", "", "", realFilePath)
                     return
                 searchKey = audio["title"][0] + " " + audio["artist"][0].split(",")[0]
                 searchKey = re.sub('\([\s\S]+\)', '', searchKey).strip()
@@ -349,13 +350,13 @@ class LogicNormal(object):
                             #logger.debug( "newFilePath : " + newFilePath)
                             #logger.debug( "newFolderPath : " + newFolderPath)
                             realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                            LogicNormal.procSave("중복" , title, artist, album, titlaByTag, artistByTag, albumByTag, realFilePath)
+                            LogicNormal.procSave("중복" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
                         else:
                             #logger.debug( "newFilePath : " + newFilePath)
                             #logger.debug( "newFolderPath : " + newFolderPath)
                             realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                            LogicNormal.procSave("정상" , title, artist, album, titlaByTag, artistByTag, albumByTag, realFilePath)
+                            LogicNormal.procSave("정상" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
                     
                 if len(lis) < 1 or not match:
@@ -371,7 +372,7 @@ class LogicNormal(object):
                     else:
                         status = "매칭실패"
                     logger.debug(status)
-                    LogicNormal.procSave(status , title, artist, album, titlaByTag, artistByTag, albumByTag, realFilePath)
+                    LogicNormal.procSave(status , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
             else:
                 logger.debug("파일존재 미확인")
         else:

@@ -5,7 +5,16 @@
   <form id="form_search" class="form-inline" style="text-align:left">
     <div class="container-fluid">
       <div class="row show-grid">
-        <span class="col-md-2"></span>
+        <span class="col-md-2">
+          <select id="option" name="option" class="form-control form-control-sm">
+            <option value="all">전체</option>
+            <option value="정상">정상</option>
+            <option value="중복">중복</option>
+            <option value="매칭실패">매칭실패</option>
+            <option value="태그정보 없음">태그정보없음</option>
+            <option value="검색결과없음">검색결과없음</option>
+          </select>
+        </span>
         <span class="col-md-8">
           <input id="search_word" name="search_word" class="form-control form-control-sm w-75" type="text" placeholder="" aria-label="Search">
           <button id="search" class="btn btn-sm btn-outline-success">검색</button>
@@ -84,7 +93,7 @@ function make_list(data) {
     str += '</div>';
     str += '<div class="col-sm-2" style="text-align:left; word-break:break-all;">';
     str += m_button('updateTag_btn', 'TAG 수정', [{'key':'id', 'value':data[i].id}]);
-    str += m_button('search_btn', '멜론검색', [{'key':'searchKey', 'value':'사계%20%20태연'}]);
+    str += m_button('search_btn', '멜론검색', [{'key':'searchKey', 'value':data[i].searchKey}]);
     str += '</div>';
     str += m_row_end();
     if (i != data.length -1) str += m_hr();
