@@ -214,12 +214,12 @@ $("body").on('click', '#update_btn', function(e){
       //debugger;
 
       if (ret) {
-        $.notify('<strong>삭제하였습니다.</strong>', {
+        $.notify('<strong>수정하였습니다.</strong>', {
           type: 'success'
         });
         request_search(current_data.paging.current_page, false)
       } else {
-        $.notify('<strong>삭제 실패</strong>', {
+        $.notify('<strong>수정 실패</strong>', {
           type: 'warning'
         });
       }

@@ -23,7 +23,7 @@ logger = get_logger(package_name)
 
 from .model import ModelSetting, ModelItem
 from .logic import Logic
-#from .logic_normal import LogicNormal
+
 
 #########################################################
 
@@ -117,6 +117,7 @@ def ajax(sub):
             ret = ModelItem.delete(request)
             return jsonify(ret)
         elif sub == 'update_tag':
+            from .logic_normal import LogicNormal
             ret = LogicNormal.tagUpdate(request)
             return jsonify(ret)
             

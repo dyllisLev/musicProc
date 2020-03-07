@@ -17,7 +17,11 @@ from lxml import html
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3
+from mutagen.id3 import ID3, ID3NoHeaderError, APIC, TT2, TPE1, TRCK, TALB, USLT, error, TIT2
+from mutagen.mp3 import EasyMP3 as MP3
+import mutagen
+
+
 
 
 # sjva 공용
@@ -81,6 +85,9 @@ class LogicNormal(object):
     @staticmethod
     def tagUpdate(req):
 
+        
+        #tags.save(filePath)
+        
         id = ""
         title = ""
         artist = ""
@@ -106,18 +113,27 @@ class LogicNormal(object):
         if os.path.isfile(filePath):
             logger.debug("파일존재 확인"  + filePath)
             
-            audio = EasyID3(filePath)
+            try:
+                tags = ID3(filePath)
+                tags.add(TALB(text=[unicode(str(album))]))
+                tags.add(TIT2(text=[unicode(str(title))]))
+                tags.add(TPE1(text=[unicode(str(artist))]))
+                tags.save()
 
-            audio["title"] = unicode(title)
-            audio["artist"] = unicode(artist)
-            audio["album"] = unicode(album)
-            audio.save()
-            logger.debug("파일처리시작"  + filePath)
-            LogicNormal.mp3FileProc(filePath)
+                logger.debug("파일처리시작"  + filePath)
+                LogicNormal.mp3FileProc(filePath)
+
+                ret = {}
+                return ret
+            except ID3NoHeaderError:
+                logger.debug("except")
+                tags = ID3()
             
-
-        ret = {}
-        return ret
+            
+        else:
+            return      
+        
+        
 
     @staticmethod
     def get_html(url, referer=None, stream=False):
@@ -221,18 +237,16 @@ class LogicNormal(object):
             if os.path.isfile(file):
                 logger.debug("파일존재 확인"  + file)
 
-                audio = EasyID3(file)
+                nonTag = False
+                audio = EasyID3()
+                try:
+                    audio = EasyID3(file)
+                except Exception as e:
+                    nonTag = True
+                
                 
                 if len(audio) < 1 :
-                    logger.debug("태그정보 없음.")
-                    newFolderPath = err_path+"/nonTAG"
-                    newFilePath = newFolderPath + "/" + os.path.basename(file)
-                    #logger.debug( "newFilePath : " + newFilePath)
-                    #logger.debug( "newFolderPath : " + newFolderPath)
-                    realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                    LogicNormal.procSave("태그정보 없음." , "", "", "", "", "", "", "", realFilePath)
-                    return
-
+                    nonTag = True
 
                 titlaByTag = ""
                 artistByTag = ""
@@ -248,6 +262,9 @@ class LogicNormal(object):
                 
 
                 if titlaByTag == "" or artistByTag == "" or albumByTag == "":
+                    nonTag = True
+                
+                if nonTag :
                     logger.debug("태그정보 없음.")
                     newFolderPath = err_path+"/nonTAG"
                     newFilePath = newFolderPath + "/" + os.path.basename(file)
@@ -256,6 +273,7 @@ class LogicNormal(object):
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                     LogicNormal.procSave("태그정보 없음." , "", "", "", "", "", "", "", realFilePath)
                     return
+
                 searchKey = audio["title"][0] + " " + audio["artist"][0].split(",")[0]
                 searchKey = re.sub('\([\s\S]+\)', '', searchKey).strip()
                 
@@ -346,6 +364,7 @@ class LogicNormal(object):
                         folderStructure = folderStructure.replace('%album%', album)
                         newFolderPath = organize_path+"/"+folderStructure
 
+                        fileRenameSet = str(os.path.basename(file))[:-4]
                         if fileRename == "True":
                             fileRenameSet = fileRenameSet.replace('%title%', title)
                             fileRenameSet = fileRenameSet.replace('%artist%', artist)
