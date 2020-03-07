@@ -16,7 +16,7 @@
     {{ macros.m_tab_content_start('normal', true) }}
       {{ macros.setting_input_text('download_path', '다운로드 경로', value=arg['download_path'], desc=['다운로드 경로입니다.']) }}
       {{ macros.setting_input_text('proc_path', '파일처리 경로', value=arg['proc_path'], desc=['파일처리 경로입니다.']) }}
-      {{ macros.setting_input_text('err_path', '오류파일 경로', value=arg['err_path'], desc=['오류파일 경로입니다.']) }}
+      {{ macros.setting_input_text('err_path', '오류파일 경로', value=arg['err_path'], desc=['오류파일 경로입니다.','※ 다운로드 경로안에 속하게 하지 마세요.']) }}
       {{ macros.setting_input_text('maxCost', '전체매칭점수', value=arg['maxCost'], desc=['가수, 제목, 앨범 매칭의 총 점수 기준입니다.','총 점수 300으로 해당 설정 점수로 매칭을 판단합니다.']) }}
       {{ macros.setting_input_text('singleCost', '단독매칭점수', value=arg['singleCost'], desc=['가수, 제목, 앨범 각각의 매칭점수 입니다.','각 점수 100으로 해당 설정 점수로 매칭을 판단합니다.','전체매칭점수와 단독매칭점수 두 조건의 AND 조건으로 판단합니다.']) }}
       {{ macros.setting_input_text('folderStructure', '폴더생성구조', value=arg['folderStructure'], desc=['폴더가 생성되는 구조입니다.','%title% : 노래제목','%artist% : 가수','%album% : 앨범명']) }}

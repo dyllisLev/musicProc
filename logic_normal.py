@@ -275,8 +275,13 @@ class LogicNormal(object):
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                     LogicNormal.procSave("태그정보 없음." , "", "", "", "", "", "", "", realFilePath)
                     return
+                
+                logger.debug( "titlaByTag : " + titlaByTag)
+                logger.debug( "artistByTag : " + artistByTag)
+                logger.debug( "albumByTag : " + albumByTag)
+                
 
-                searchKey = audio["title"][0] + " " + audio["artist"][0].split(",")[0]
+                searchKey = titlaByTag + " " + artistByTag
                 searchKey = re.sub('\([\s\S]+\)', '', searchKey).strip()
                 
                 logger.debug("검색어 "  + searchKey )
