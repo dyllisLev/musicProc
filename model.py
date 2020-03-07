@@ -230,6 +230,18 @@ class ModelItem(db.Model):
         except Exception, e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
+    
+    @staticmethod
+    def delete(id):
+        try:
+            logger.debug( "delete")
+            db.session.query(ModelItem).filter_by(id=id).delete()
+            db.session.commit()
+            
+        except Exception, e:
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+    
 
 
 

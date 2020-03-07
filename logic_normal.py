@@ -123,6 +123,8 @@ class LogicNormal(object):
                 logger.debug("파일처리시작"  + filePath)
                 LogicNormal.mp3FileProc(filePath)
 
+                ModelItem.delete(id)
+                
                 ret = {}
                 return ret
             except ID3NoHeaderError:
