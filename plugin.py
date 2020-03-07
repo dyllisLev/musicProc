@@ -34,7 +34,7 @@ from .logic import Logic
 blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_name, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
 
 menu = {
-    'main' : [package_name, '음악파일처리'],
+    'main' : [package_name, '음악정리'],
     'sub' : [
         ['setting', '설정'], ['list', '목록'], ['log', '로그']
     ],
@@ -46,7 +46,7 @@ plugin_info = {
     'name' : 'musicProc',
     'category_name' : 'service',
     'developer' : 'dyllis.lev',
-    'description' : '음악파일처리',
+    'description' : '음악정리',
     'home' : 'https://github.com/dyllisLev/musicProc',
     'more' : '',
 }
