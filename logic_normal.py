@@ -91,7 +91,7 @@ class LogicNormal(object):
                         logger.debug('Exception:%s', e)
                         logger.debug(traceback.format_exc())
             
-            if ModelSetting.get_bool('emptyFolderDelete')::
+            if ModelSetting.get_bool('emptyFolderDelete'):
                 for dir_path in dirList:
                     if len(os.listdir(dir_path)) == 0:
                         os.rmdir(dir_path)
