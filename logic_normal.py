@@ -72,11 +72,26 @@ class LogicNormal(object):
                     dirList.append(dir_path)
 
                 for file in file_names:
-                    filepath = os.path.join(rootpath, file)
-                    LogicNormal.mp3FileProc(filepath)
-                    time.sleep(int(interval))
+                    try:
+                        filepath = os.path.join(rootpath, file)
+
+                        """
+                        logger.debug('=================================DEBUG START=================================')
+                        LogicNormal.debugTest(filepath)
+                        logger.debug('=================================DEBUG END=================================')
+                        """
+                        LogicNormal.mp3FileProc(filepath)
+                        time.sleep(int(interval))
+                    except Exception as e:
+                        newFolderPath = os.path.join(ModelSetting.get('err_path'), "ERR")
+                        newFilePath = os.path.join(newFolderPath, os.path.basename(file))
+                        realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
+                        #realFilePath = "test"
+                        LogicNormal.procSave("ERR" , "", "", "", "", "", "", "", realFilePath)
+                        logger.debug('Exception:%s', e)
+                        logger.debug(traceback.format_exc())
             
-            if emptyFolderDelete == "True":
+            if ModelSetting.get_bool('emptyFolderDelete')::
                 for dir_path in dirList:
                     if len(os.listdir(dir_path)) == 0:
                         os.rmdir(dir_path)
@@ -225,11 +240,19 @@ class LogicNormal(object):
             os.makedirs(newFolderPath)
         
         logger.debug("파일이동 시작")
+        """
         fileName = os.path.basename(newFilePath)
         fileName = fileName.replace('"',"'")
         newFilePath = os.path.join( newFolderPath, fileName )
         logger.debug(originPath + " ===>> " + newFilePath)
         os.rename(originPath, newFilePath)
+        """
+        if os.path.exists(newFilePath):
+            os.remove(newFilePath)
+        import shutil
+        shutil.move(originPath, newFilePath)
+        
+
         logger.debug("파일이동 완료")
         return newFilePath
     @staticmethod
@@ -389,12 +412,13 @@ class LogicNormal(object):
                         folderStructure = folderStructure.replace('%album%', album)
                         newFolderPath = os.path.join(organize_path, folderStructure)
 
-                        fileRenameSet = os.path.basename(file)
-                        if fileRename == "True":
+                        if ModelSetting.get_bool('fileRename'):
                             fileRenameSet = fileRenameSet.replace('%title%', title)
                             fileRenameSet = fileRenameSet.replace('%artist%', artist)
                             fileRenameSet = fileRenameSet.replace('%album%', album)
                             fileRenameSet = os.path.join(newFolderPath,fileRenameSet)
+                        else:
+                            fileRenameSet = os.path.basename(file)
                         
                         newFilePath = os.path.join(newFolderPath, fileRenameSet )
                         newFolderPath = newFolderPath.replace('"',"'")
@@ -497,3 +521,13 @@ class LogicNormal(object):
         logger.debug( "tagsRtn['artistByTag'] : " + tagsRtn['artistByTag'])
         logger.debug( "tagsRtn['albumByTag'] : " + tagsRtn['albumByTag'])
         return tagsRtn
+    @staticmethod
+    def debugTest(file):
+
+        logger.debug( "file : " + str( file ))
+        LogicNormal.getTagInfo(file)
+        subprocess.check_output (['mid3iconv', '-e', 'cp949', os.path.join(file)])
+        LogicNormal.getTagInfo(file)
+        
+
+
