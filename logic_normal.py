@@ -206,8 +206,8 @@ class LogicNormal(object):
         #a = re.sub(rep, '', a)
         #b = re.sub(rep, '', b)
 
-        logger.debug( "a : " + a + ", " + str(len(a)))
-        logger.debug( "b : " + b + ", " + str(len(b)))
+        #logger.debug( "a : " + a + ", " + str(len(a)))
+        #logger.debug( "b : " + b + ", " + str(len(b)))
         
         if a == b :
             if len(a)<len(b):
@@ -301,7 +301,7 @@ class LogicNormal(object):
                 nonTag = False
                 
                 tags = LogicNormal.getTagInfo(file)
-                logger.debug("tags : " + str( tags ))
+                #logger.debug("tags : " + str( tags ))
                 
                 titlaByTag = tags['titlaByTag']
                 artistByTag = tags['artistByTag']
@@ -337,7 +337,7 @@ class LogicNormal(object):
 
                 lis = tree.xpath('/html/body/div[1]/form/ul/li')
 
-                logger.debug( "li CNT : " + str(len( lis )) )
+                #logger.debug( "li CNT : " + str(len( lis )) )
                 match = False
 
                 title = ""
@@ -480,8 +480,8 @@ class LogicNormal(object):
             try:
                 audio = MP3(file)
                 
-                for frame in mutagen.File(file).tags.keys():
-                    logger.debug(str(frame))
+                #for frame in mutagen.File(file).tags.keys():
+                #    logger.debug(str(frame))
 
                 if len(audio) < 1 :
                     nonTag = True
@@ -497,34 +497,34 @@ class LogicNormal(object):
         if "M4A" == ext.upper() :
             
             tags = MP4(file)
-            logger.debug( "tags : " + str( tags.keys() ))
-            logger.debug( "title : " + str( tags.get('\xa9nam')[0] ))
-            logger.debug( "album : " + str( tags.get('\xa9alb')[0] ))
-            logger.debug( "artist : " + str( tags.get('\xa9ART')[0] ))
+            #logger.debug( "tags : " + str( tags.keys() ))
+            #logger.debug( "title : " + str( tags.get('\xa9nam')[0] ))
+            #logger.debug( "album : " + str( tags.get('\xa9alb')[0] ))
+            #logger.debug( "artist : " + str( tags.get('\xa9ART')[0] ))
             tagsRtn['titlaByTag'] = str( tags.get('\xa9nam')[0] ).upper().strip()
             tagsRtn['artistByTag'] = str( tags.get('\xa9ART')[0] ).upper().strip()
             tagsRtn['albumByTag'] = str( tags.get('\xa9alb')[0] ).upper().strip()
         if "FLAC" == ext.upper() :
 
             tags = FLAC(file)
-            logger.debug( "tags : " + str( tags.keys() ))
-            logger.debug( "title : " + str( tags.get('title')[0] ))
-            logger.debug( "album : " + str( tags.get('album')[0] ))
-            logger.debug( "artist : " + str( tags.get('artist')[0] ))
+            #logger.debug( "tags : " + str( tags.keys() ))
+            #logger.debug( "title : " + str( tags.get('title')[0] ))
+            #logger.debug( "album : " + str( tags.get('album')[0] ))
+            #logger.debug( "artist : " + str( tags.get('artist')[0] ))
             tagsRtn['titlaByTag'] = str( tags.get('title')[0] ).upper().strip()
             tagsRtn['artistByTag'] = str( tags.get('artist')[0] ).upper().strip()
             tagsRtn['albumByTag'] = str( tags.get('album')[0] ).upper().strip()
 
-        logger.debug( "tagsRtn['titlaByTag'] : " + tagsRtn['titlaByTag'])
-        logger.debug( "tagsRtn['titlaByTag'] : " + tagsRtn['titlaByTag'].decode("UTF-8"))
-        logger.debug( "tagsRtn['titlaByTag'] : " + tagsRtn['titlaByTag'].encode("UTF-8"))
-        logger.debug( "tagsRtn['artistByTag'] : " + tagsRtn['artistByTag'])
-        logger.debug( "tagsRtn['albumByTag'] : " + tagsRtn['albumByTag'])
+        #logger.debug( "tagsRtn['titlaByTag'] : " + tagsRtn['titlaByTag'])
+        #logger.debug( "tagsRtn['titlaByTag'] : " + tagsRtn['titlaByTag'].decode("UTF-8"))
+        #logger.debug( "tagsRtn['titlaByTag'] : " + tagsRtn['titlaByTag'].encode("UTF-8"))
+        #logger.debug( "tagsRtn['artistByTag'] : " + tagsRtn['artistByTag'])
+        #logger.debug( "tagsRtn['albumByTag'] : " + tagsRtn['albumByTag'])
         return tagsRtn
     @staticmethod
     def debugTest(file):
 
-        logger.debug( "file : " + str( file ))
+        #logger.debug( "file : " + str( file ))
         LogicNormal.getTagInfo(file)
         subprocess.check_output (['mid3iconv', '-e', 'cp949', os.path.join(file)])
         LogicNormal.getTagInfo(file)
