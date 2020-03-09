@@ -54,6 +54,7 @@ class LogicNormal(object):
     session = requests.Session()
     driver = None
 
+    nonTag = False
     @staticmethod
     def scheduler_function():
         # 자동 추가 목록에 따라 큐에 집어넣음.
@@ -297,22 +298,14 @@ class LogicNormal(object):
 
             if os.path.isfile(file):
                 logger.debug("파일존재 확인"  + file)
-
+                global nonTag
                 nonTag = False
                 
                 tags = LogicNormal.getTagInfo(file)
                 #logger.debug("tags : " + str( tags ))
                 
-                titlaByTag = tags['titlaByTag']
-                artistByTag = tags['artistByTag']
-                albumByTag = tags['albumByTag']
-
-                logger.debug( "titlaByTag : " + titlaByTag)
-                logger.debug( "artistByTag : " + artistByTag)
-                logger.debug( "albumByTag : " + albumByTag)
-                
-                if titlaByTag == "" or artistByTag == "" or albumByTag == "":
-                    nonTag = True
+                #if titlaByTag == "" or artistByTag == "" or albumByTag == "":
+                #    nonTag = True
                 
                 if nonTag :
                     logger.debug("태그정보 없음.")
@@ -322,6 +315,14 @@ class LogicNormal(object):
                     LogicNormal.procSave("태그정보 없음." , "", "", "", "", "", "", "", realFilePath)
                     return
                 
+                titlaByTag = tags['titlaByTag']
+                artistByTag = tags['artistByTag']
+                albumByTag = tags['albumByTag']
+
+                logger.debug( "titlaByTag : " + titlaByTag)
+                logger.debug( "artistByTag : " + artistByTag)
+                logger.debug( "albumByTag : " + albumByTag)
+
                 searchKey = titlaByTag + " " + artistByTag
                 searchKey = re.sub('\([\s\S]+\)', '', searchKey).strip()
                 
@@ -482,18 +483,18 @@ class LogicNormal(object):
                 
                 #for frame in mutagen.File(file).tags.keys():
                 #    logger.debug(str(frame))
-
-                if len(audio) < 1 :
+                if "title" not in audio.tags.keys() or "artist" not in audio.tags.keys() or "album" not in audio.tags.keys():
+                    global nonTag
                     nonTag = True
-                
-                tagsRtn['titlaByTag'] = audio.tags['title'][0].upper().strip()
-                tagsRtn['artistByTag'] = audio.tags['artist'][0].upper().strip()
-                tagsRtn['albumByTag'] = audio["album"][0].upper().strip()
+                else:
+                    tagsRtn['titlaByTag'] = audio.tags['title'][0].upper().strip()
+                    tagsRtn['artistByTag'] = audio.tags['artist'][0].upper().strip()
+                    tagsRtn['albumByTag'] = audio["album"][0].upper().strip()
                 
             except Exception as e:
                 nonTag = True
-                logger.error('Exception:%s', e)
-                logger.error(traceback.format_exc())
+                logger.debug('Exception:%s', e)
+                logger.debug(traceback.format_exc())
         if "M4A" == ext.upper() :
             
             tags = MP4(file)
