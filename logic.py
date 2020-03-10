@@ -10,7 +10,7 @@ import subprocess
 # third-party
 
 # sjva 공용
-from framework import db, scheduler, path_data
+from framework import db, scheduler, path_data, celery
 from framework.job import Job
 from framework.util import Util
 
@@ -130,7 +130,13 @@ class Logic(object):
     @staticmethod
     def scheduler_function():
         try:
-            LogicNormal.scheduler_function()
+            #LogicNormal.scheduler_function()
+            from framework import app
+            if app.config['config']['use_celery']:
+                result = LogicNormal.scheduler_function.apply_async()
+                result.get()
+            else:
+                LogicNormal.scheduler_function()
         except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())

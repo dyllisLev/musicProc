@@ -53,9 +53,9 @@ headers = {
 class LogicNormal(object):
     session = requests.Session()
     driver = None
-
-    nonTag = False
+    
     @staticmethod
+    @celery.task
     def scheduler_function():
         # 자동 추가 목록에 따라 큐에 집어넣음.
         try:
@@ -84,13 +84,17 @@ class LogicNormal(object):
                         LogicNormal.mp3FileProc(filepath)
                         time.sleep(int(interval))
                     except Exception as e:
-                        newFolderPath = os.path.join(ModelSetting.get('err_path'), "ERR")
-                        newFilePath = os.path.join(newFolderPath, os.path.basename(file))
-                        realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                        #realFilePath = "test"
-                        LogicNormal.procSave("ERR" , "", "", "", "", "", "", "", realFilePath)
-                        logger.debug('Exception:%s', e)
-                        logger.debug(traceback.format_exc())
+                        try:
+                            newFolderPath = os.path.join(ModelSetting.get('err_path'), "ERR")
+                            newFilePath = os.path.join(newFolderPath, os.path.basename(file))
+                            realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
+                            LogicNormal.procSave("ERR" , "", "", "", "", "", "", "", realFilePath)
+                            logger.debug('Exception:%s', e)
+                            logger.debug(traceback.format_exc())
+                        except Exception as e:
+                            logger.debug('Exception:%s', e)
+                            logger.debug(traceback.format_exc())
+
             
             if ModelSetting.get_bool('emptyFolderDelete'):
                 for dir_path in dirList:
@@ -288,8 +292,6 @@ class LogicNormal(object):
         
 
         #인코딩 변경
-        if platform.system() == 'Windows':
-            file = file.encode('cp949')
         subprocess.check_output (['mid3iconv', '-e', 'cp949', os.path.join(file)])
         
         ext = file.split(".")[-1]
@@ -298,8 +300,7 @@ class LogicNormal(object):
 
             if os.path.isfile(file):
                 logger.debug("파일존재 확인"  + file)
-                global nonTag
-                nonTag = False
+                
                 
                 tags = LogicNormal.getTagInfo(file)
                 #logger.debug("tags : " + str( tags ))
@@ -307,7 +308,7 @@ class LogicNormal(object):
                 #if titlaByTag == "" or artistByTag == "" or albumByTag == "":
                 #    nonTag = True
                 
-                if nonTag :
+                if tags == {} :
                     logger.debug("태그정보 없음.")
                     newFolderPath = os.path.join(err_path, "nonTAG")
                     newFilePath = os.path.join(newFolderPath, os.path.basename(file))
@@ -411,13 +412,15 @@ class LogicNormal(object):
                         folderStructure = folderStructure.replace('%title%', title)
                         folderStructure = folderStructure.replace('%artist%', artist)
                         folderStructure = folderStructure.replace('%album%', album)
-                        newFolderPath = os.path.join(organize_path, folderStructure)
+                        #newFolderPath = os.path.join(organize_path, folderStructure)
+                        newFolderPath = os.path.join(organize_path, os.path.sep.join(folderStructure.split('/')))
 
                         if ModelSetting.get_bool('fileRename'):
                             fileRenameSet = fileRenameSet.replace('%title%', title)
                             fileRenameSet = fileRenameSet.replace('%artist%', artist)
                             fileRenameSet = fileRenameSet.replace('%album%', album)
-                            fileRenameSet = os.path.join(newFolderPath,fileRenameSet)
+                            #fileRenameSet = os.path.join(newFolderPath,fileRenameSet)
+                            fileRenameSet = os.path.join(newFolderPath,'%s%s' % (fileRenameSet, os.path.splitext(file)[1]))
                         else:
                             fileRenameSet = os.path.basename(file)
                         
@@ -480,47 +483,34 @@ class LogicNormal(object):
         if ext.upper() == "MP3":
             try:
                 audio = MP3(file)
-                
-                #for frame in mutagen.File(file).tags.keys():
-                #    logger.debug(str(frame))
                 if "title" not in audio.tags.keys() or "artist" not in audio.tags.keys() or "album" not in audio.tags.keys():
-                    global nonTag
-                    nonTag = True
+                    return tagsRtn
                 else:
                     tagsRtn['titlaByTag'] = audio.tags['title'][0].upper().strip()
                     tagsRtn['artistByTag'] = audio.tags['artist'][0].upper().strip()
                     tagsRtn['albumByTag'] = audio["album"][0].upper().strip()
-                
             except Exception as e:
-                nonTag = True
                 logger.debug('Exception:%s', e)
                 logger.debug(traceback.format_exc())
         if "M4A" == ext.upper() :
-            
-            tags = MP4(file)
-            #logger.debug( "tags : " + str( tags.keys() ))
-            #logger.debug( "title : " + str( tags.get('\xa9nam')[0] ))
-            #logger.debug( "album : " + str( tags.get('\xa9alb')[0] ))
-            #logger.debug( "artist : " + str( tags.get('\xa9ART')[0] ))
-            tagsRtn['titlaByTag'] = str( tags.get('\xa9nam')[0] ).upper().strip()
-            tagsRtn['artistByTag'] = str( tags.get('\xa9ART')[0] ).upper().strip()
-            tagsRtn['albumByTag'] = str( tags.get('\xa9alb')[0] ).upper().strip()
+            try:
+                tags = MP4(file)
+                tagsRtn['titlaByTag'] = str( tags.get('\xa9nam')[0] ).upper().strip()
+                tagsRtn['artistByTag'] = str( tags.get('\xa9ART')[0] ).upper().strip()
+                tagsRtn['albumByTag'] = str( tags.get('\xa9alb')[0] ).upper().strip()
+            except Exception as e:
+                logger.debug('Exception:%s', e)
+                logger.debug(traceback.format_exc())
         if "FLAC" == ext.upper() :
+            try:
+                tags = FLAC(file)
+                tagsRtn['titlaByTag'] = str( tags.get('title')[0] ).upper().strip()
+                tagsRtn['artistByTag'] = str( tags.get('artist')[0] ).upper().strip()
+                tagsRtn['albumByTag'] = str( tags.get('album')[0] ).upper().strip()
+            except Exception as e:
+                logger.debug('Exception:%s', e)
+                logger.debug(traceback.format_exc())
 
-            tags = FLAC(file)
-            #logger.debug( "tags : " + str( tags.keys() ))
-            #logger.debug( "title : " + str( tags.get('title')[0] ))
-            #logger.debug( "album : " + str( tags.get('album')[0] ))
-            #logger.debug( "artist : " + str( tags.get('artist')[0] ))
-            tagsRtn['titlaByTag'] = str( tags.get('title')[0] ).upper().strip()
-            tagsRtn['artistByTag'] = str( tags.get('artist')[0] ).upper().strip()
-            tagsRtn['albumByTag'] = str( tags.get('album')[0] ).upper().strip()
-
-        #logger.debug( "tagsRtn['titlaByTag'] : " + tagsRtn['titlaByTag'])
-        #logger.debug( "tagsRtn['titlaByTag'] : " + tagsRtn['titlaByTag'].decode("UTF-8"))
-        #logger.debug( "tagsRtn['titlaByTag'] : " + tagsRtn['titlaByTag'].encode("UTF-8"))
-        #logger.debug( "tagsRtn['artistByTag'] : " + tagsRtn['artistByTag'])
-        #logger.debug( "tagsRtn['albumByTag'] : " + tagsRtn['albumByTag'])
         return tagsRtn
     @staticmethod
     def debugTest(file):
