@@ -153,7 +153,7 @@ class ModelItem(db.Model):
     @staticmethod
     def save_as_dict(d):
         try:
-            logger.debug(d)
+            
             entity = ModelItem()
             entity.status = unicode(d['status'])
             entity.title = unicode(d['title'])
@@ -167,6 +167,7 @@ class ModelItem(db.Model):
             db.session.add(entity)
             db.session.commit()
         except Exception as e:
+            logger.error(d)
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
     @staticmethod
@@ -211,9 +212,7 @@ class ModelItem(db.Model):
     @staticmethod
     def migration():
         try:
-            logger.debug( "migration !!")
-
-            # application starts
+            
             from sqlalchemy.orm import sessionmaker
             Session = sessionmaker()
             engine = create_engine(app.config['SQLALCHEMY_BINDS'][package_name])
@@ -221,10 +220,8 @@ class ModelItem(db.Model):
 
             sess = Session()
             query = sess.execute("SELECT * FROM musicProc_item")
-            if "searchKey" in query.keys():
-                logger.debug( "포함")
-            else:
-                logger.debug( "미포함")
+            if "searchKey" not in query.keys():
+                logger.debug( "migration !!")
                 sess.execute('ALTER TABLE musicProc_item ADD COLUMN searchKey VARCHAR')
             
         except Exception, e:

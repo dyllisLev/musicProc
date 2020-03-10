@@ -98,7 +98,7 @@ class LogicNormal(object):
             
             if ModelSetting.get_bool('emptyFolderDelete'):
                 for dir_path in dirList:
-                    if len(os.listdir(dir_path)) == 0:
+                    if download_path != dir_path and len(os.listdir(dir_path)) == 0:
                         os.rmdir(dir_path)
 
             logger.debug("===============END=================")
@@ -109,9 +109,6 @@ class LogicNormal(object):
     @staticmethod
     def tagUpdate(req):
 
-        
-        #tags.save(filePath)
-        
         id = ""
         title = ""
         artist = ""
@@ -150,12 +147,6 @@ class LogicNormal(object):
             if "M4A" == ext.upper() :
                 
                 tags = MP4(filePath)
-                """
-                logger.debug( "tags : " + str(tags.keys()))
-                logger.debug( "title : " + str(tags['\xa9nam']))
-                logger.debug( "artist : " + str(tags['\xa9ART']))
-                logger.debug( "album : " + str(tags['\xa9alb']))
-                """
                 tags['\xa9nam'][0] = unicode(str(title))
                 tags['\xa9ART'][0] = unicode(str(artist))
                 tags['\xa9alb'][0] = unicode(str(album))
@@ -207,13 +198,6 @@ class LogicNormal(object):
     @staticmethod
     def lcs(a, b):
 
-        #rep = '[-=.#/?:$}\"\“\”]'
-        #a = re.sub(rep, '', a)
-        #b = re.sub(rep, '', b)
-
-        #logger.debug( "a : " + a + ", " + str(len(a)))
-        #logger.debug( "b : " + b + ", " + str(len(b)))
-        
         if a == b :
             if len(a)<len(b):
                 return len(b)
@@ -245,13 +229,7 @@ class LogicNormal(object):
             os.makedirs(newFolderPath)
         
         logger.debug("파일이동 시작")
-        """
-        fileName = os.path.basename(newFilePath)
-        fileName = fileName.replace('"',"'")
-        newFilePath = os.path.join( newFolderPath, fileName )
         logger.debug(originPath + " ===>> " + newFilePath)
-        os.rename(originPath, newFilePath)
-        """
         if os.path.exists(newFilePath):
             os.remove(newFilePath)
         import shutil
@@ -291,22 +269,17 @@ class LogicNormal(object):
         fileRenameSet = ModelSetting.get('fileRenameSet')
         
 
-        #인코딩 변경
-        subprocess.check_output (['mid3iconv', '-e', 'cp949', os.path.join(file)])
-        
         ext = file.split(".")[-1]
 
         if ext.upper() in "MP3|FLAC|M4A":
 
+            #인코딩 변경
+            subprocess.check_output (['mid3iconv', '-e', 'cp949', os.path.join(file)])
+            
             if os.path.isfile(file):
                 logger.debug("파일존재 확인"  + file)
                 
-                
                 tags = LogicNormal.getTagInfo(file)
-                #logger.debug("tags : " + str( tags ))
-                
-                #if titlaByTag == "" or artistByTag == "" or albumByTag == "":
-                #    nonTag = True
                 
                 if tags == {} :
                     logger.debug("태그정보 없음.")
@@ -339,7 +312,6 @@ class LogicNormal(object):
 
                 lis = tree.xpath('/html/body/div[1]/form/ul/li')
 
-                #logger.debug( "li CNT : " + str(len( lis )) )
                 match = False
 
                 title = ""
@@ -347,8 +319,6 @@ class LogicNormal(object):
                 album = ""
 
                 for li in lis:
-                    
-                    
                     
                     title = li.get('d-songname').strip().upper()
                     artist = re.sub('\([\s\S]+\)', '', li.get('d-artistname')).strip().upper()
@@ -371,38 +341,20 @@ class LogicNormal(object):
                         albumMaxLength = len(album)
                     else:
                         albumMaxLength = len(albumByTag)
-                    
-                    logger.debug( "titlaByTag : " + str( titlaByTag )  )
-                    logger.debug( "title : " + str( title)  )
-                    logger.debug( "artistByTag : " + str( artistByTag )  )
-                    logger.debug( "artist : " + str( artist)  )
-                    logger.debug( "albumByTag : " + str( albumByTag )  )
-                    logger.debug( "album : " + str( album)  )
-
-                    logger.debug( "titleMaxLength : " + str( titleMaxLength)  )
-                    logger.debug( "artistMaxLength : " + str( artistMaxLength)  )
-                    logger.debug( "albumMaxLength : " + str( albumMaxLength)  )
-                    
+                        
                     titlelcs = LogicNormal.lcs(titlaByTag, title)
                     artistlcs = LogicNormal.lcs(artistByTag, artist)
                     albumlcs = LogicNormal.lcs(albumByTag, album)
-                    logger.debug( "titlelcs : " + str( titlelcs )  )
-                    logger.debug( "artistlcs : " + str( artistlcs )  )
-                    logger.debug( "albumlcs : " + str( albumlcs )  )
                     
                     titleSimilarity = ( float(titlelcs) / float(titleMaxLength) ) * 100
                     artistSimilarity = ( float(artistlcs) / float(artistMaxLength) ) * 100
                     albumSimilarity = ( float(albumlcs) / float(albumMaxLength) ) * 100
                     
-                    
-                    logger.debug( "titleSimilarity : " + str( titleSimilarity)  )
-                    logger.debug( "artistSimilarity : " + str( artistSimilarity)  )
-                    logger.debug( "albumSimilarity : " + str( albumSimilarity)  )
+                    logger.debug( "titlaByTag : " + str( titlaByTag )  + "|| title : " + str( title) + " || titleMaxLength : " + str( titleMaxLength) + " || titlelcs : " + str( titlelcs ) + " || titleSimilarity : " + str( titleSimilarity))
+                    logger.debug( "artistByTag : " + str( artistByTag ) + "|| artist : " + str( artist) + " || artistMaxLength : " + str( artistMaxLength) + " || artistlcs : " + str( artistlcs ) + " || artistSimilarity : " + str( artistSimilarity))
+                    logger.debug( "albumByTag : " + str( albumByTag ) + "|| album : " + str( album) + "|| albumMaxLength : " + str( albumMaxLength) + " || albumlcs : " + str( albumlcs ) + " || albumSimilarity : " + str( albumSimilarity))
                     logger.debug( "------------------------------------")
                     
-                    #logger.debug(audio["title"][0] + " == " + title + " / " + str( LogicNormal.OneEditApart(audio["title"][0].upper(), title.upper()) ))
-                    #logger.debug(audio["artist"][0] + " == " + artist + " / " + str( LogicNormal.OneEditApart(audio["artist"][0].upper(), audio["artist"][0].split(",")[0].upper()) ))
-    
                     if ( titleSimilarity + artistSimilarity + albumSimilarity ) > int(maxCost) and ( titleSimilarity > 0 and artistSimilarity > 0 and albumSimilarity > int(singleCost) ) :
 
                         title = li.get('d-songname').strip()
@@ -433,14 +385,10 @@ class LogicNormal(object):
                             logger.debug("이미 파일있음" + file)
                             newFolderPath = os.path.join( err_path, "fileDupe" )
                             newFilePath = os.path.join( newFolderPath, os.path.basename(file) )
-                            #logger.debug( "newFilePath : " + newFilePath)
-                            #logger.debug( "newFolderPath : " + newFolderPath)
                             realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                             LogicNormal.procSave("중복" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
                         else:
-                            #logger.debug( "newFilePath : " + newFilePath)
-                            #logger.debug( "newFolderPath : " + newFolderPath)
                             realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                             LogicNormal.procSave("정상" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
@@ -449,8 +397,6 @@ class LogicNormal(object):
                     
                     newFolderPath = os.path.join( err_path, "nonSearch" )
                     newFilePath = os.path.join( newFolderPath, os.path.basename(file) )
-                    #logger.debug( "newFilePath : " + newFilePath)
-                    #logger.debug( "newFolderPath : " + newFolderPath)
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                     status = ""
                     if len(lis) < 1 :
@@ -469,10 +415,6 @@ class LogicNormal(object):
             
 
         logger.debug("================================")
-        logger.debug("")
-        logger.debug("")
-        logger.debug("")
-        logger.debug("")
 
     @staticmethod
     def getTagInfo(file):
@@ -480,8 +422,8 @@ class LogicNormal(object):
         ext = file.split(".")[-1]
 
         tagsRtn = {}
-        if ext.upper() == "MP3":
-            try:
+        try:
+            if ext.upper() == "MP3":
                 audio = MP3(file)
                 if "title" not in audio.tags.keys() or "artist" not in audio.tags.keys() or "album" not in audio.tags.keys():
                     return tagsRtn
@@ -489,27 +431,19 @@ class LogicNormal(object):
                     tagsRtn['titlaByTag'] = audio.tags['title'][0].upper().strip()
                     tagsRtn['artistByTag'] = audio.tags['artist'][0].upper().strip()
                     tagsRtn['albumByTag'] = audio["album"][0].upper().strip()
-            except Exception as e:
-                logger.debug('Exception:%s', e)
-                logger.debug(traceback.format_exc())
-        if "M4A" == ext.upper() :
-            try:
+            if "M4A" == ext.upper() :
                 tags = MP4(file)
                 tagsRtn['titlaByTag'] = str( tags.get('\xa9nam')[0] ).upper().strip()
                 tagsRtn['artistByTag'] = str( tags.get('\xa9ART')[0] ).upper().strip()
                 tagsRtn['albumByTag'] = str( tags.get('\xa9alb')[0] ).upper().strip()
-            except Exception as e:
-                logger.debug('Exception:%s', e)
-                logger.debug(traceback.format_exc())
-        if "FLAC" == ext.upper() :
-            try:
+            if "FLAC" == ext.upper() :
                 tags = FLAC(file)
                 tagsRtn['titlaByTag'] = str( tags.get('title')[0] ).upper().strip()
                 tagsRtn['artistByTag'] = str( tags.get('artist')[0] ).upper().strip()
                 tagsRtn['albumByTag'] = str( tags.get('album')[0] ).upper().strip()
-            except Exception as e:
-                logger.debug('Exception:%s', e)
-                logger.debug(traceback.format_exc())
+        except Exception as e:
+            logger.debug('Exception:%s', e)
+            logger.debug(traceback.format_exc())
 
         return tagsRtn
     @staticmethod
