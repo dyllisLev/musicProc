@@ -515,7 +515,6 @@ class LogicNormal(object):
     @staticmethod
     def debugTest(file):
 
-        #logger.debug( "file : " + str( file ))
         LogicNormal.getTagInfo(file)
         subprocess.check_output (['mid3iconv', '-e', 'cp949', os.path.join(file)])
         LogicNormal.getTagInfo(file)
