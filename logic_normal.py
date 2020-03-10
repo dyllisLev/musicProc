@@ -63,7 +63,9 @@ class LogicNormal(object):
             organize_path = ModelSetting.get('proc_path')
             interval = ModelSetting.get('interval')
             emptyFolderDelete = ModelSetting.get('emptyFolderDelete')
-
+            
+            #LogicNormal.debugTest()
+            #return
             dirList = []
             fileList = []
             for dir_path, dir_names, file_names in os.walk(download_path):
@@ -73,21 +75,16 @@ class LogicNormal(object):
                     dirList.append(dir_path)
 
                 for file in file_names:
+
                     try:
                         filepath = os.path.join(rootpath, file)
-
-                        """
-                        logger.debug('=================================DEBUG START=================================')
-                        LogicNormal.debugTest(filepath)
-                        logger.debug('=================================DEBUG END=================================')
-                        """
                         LogicNormal.mp3FileProc(filepath)
                         time.sleep(int(interval))
                     except Exception as e:
                         try:
                             newFolderPath = os.path.join(ModelSetting.get('err_path'), "ERR")
                             newFilePath = os.path.join(newFolderPath, os.path.basename(file))
-                            realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
+                            realFilePath = LogicNormal.fileMove(os.path.join(rootpath, file) , newFolderPath, newFilePath)
                             LogicNormal.procSave("ERR" , "", "", "", "", "", "", "", realFilePath)
                             logger.debug('Exception:%s', e)
                             logger.debug(traceback.format_exc())
@@ -95,7 +92,6 @@ class LogicNormal(object):
                             logger.debug('Exception:%s', e)
                             logger.debug(traceback.format_exc())
 
-            
             if ModelSetting.get_bool('emptyFolderDelete'):
                 for dir_path in dirList:
                     if download_path != dir_path and len(os.listdir(dir_path)) == 0:
@@ -224,9 +220,9 @@ class LogicNormal(object):
     @staticmethod
     def fileMove(originPath , newFolderPath, newFilePath):
 
-        if not os.path.isdir(newFolderPath):
-            logger.debug("폴더 생성 : " + newFolderPath)
-            os.makedirs(newFolderPath)
+        #if not os.path.isdir(newFolderPath):
+        logger.debug("폴더 생성 : " + newFolderPath)
+        os.makedirs(newFolderPath)
         
         logger.debug("파일이동 시작")
         logger.debug(originPath + " ===>> " + newFilePath)
@@ -302,6 +298,7 @@ class LogicNormal(object):
                 
                 logger.debug("검색어 "  + searchKey )
                 
+                #목록검색
                 url = 'https://m.app.melon.com/search/mobile4web/searchsong_list.htm?cpId=WP10&cpKey=&memberKey=0&keyword='
                 url = '%s%s' % (url, urllib.quote(searchKey.encode('utf8')))
                 
@@ -357,9 +354,20 @@ class LogicNormal(object):
                     
                     if ( titleSimilarity + artistSimilarity + albumSimilarity ) > int(maxCost) and ( titleSimilarity > 0 and artistSimilarity > 0 and albumSimilarity > int(singleCost) ) :
 
-                        title = li.get('d-songname').strip()
-                        artist = li.get('d-artistname').strip()
-                        album = li.get('d-albumname').strip()
+                        songId = li.get('d-songid').strip()
+                        albumId = li.get('d-albumid').strip()
+
+                        tags = LogicNormal.getSongTag(songId, albumId)
+                        
+
+                        #제목
+                        title = tags['title']
+                        #아티스트
+                        artist = tags['artist']
+                        #앨범
+                        album = tags['album']
+                        #트랙
+                        track = tags['track']
 
                         folderStructure = folderStructure.replace('%title%', title)
                         folderStructure = folderStructure.replace('%artist%', artist)
@@ -371,6 +379,8 @@ class LogicNormal(object):
                             fileRenameSet = fileRenameSet.replace('%title%', title)
                             fileRenameSet = fileRenameSet.replace('%artist%', artist)
                             fileRenameSet = fileRenameSet.replace('%album%', album)
+                            fileRenameSet = fileRenameSet.replace('%track%', track)
+                            
                             #fileRenameSet = os.path.join(newFolderPath,fileRenameSet)
                             fileRenameSet = os.path.join(newFolderPath,'%s%s' % (fileRenameSet, os.path.splitext(file)[1]))
                         else:
@@ -446,12 +456,113 @@ class LogicNormal(object):
             logger.debug(traceback.format_exc())
 
         return tagsRtn
+    
     @staticmethod
-    def debugTest(file):
+    def getSongTag(songId, albumId):
+        
+        allTag = {}
 
-        LogicNormal.getTagInfo(file)
-        subprocess.check_output (['mid3iconv', '-e', 'cp949', os.path.join(file)])
-        LogicNormal.getTagInfo(file)
+        url = 'https://m.app.melon.com/song/detail.htm?songId='
+        url = '%s%s' % (url, urllib.quote(songId))
+        
+        data = LogicNormal.get_html(url)
+        tree = html.fromstring(data)
+
+        #제목
+        title = ""
+        h1 = tree.xpath('/html/body/div[1]/article/div[2]/div/h1')[0]
+        title = h1.text.strip()
+        allTag['title'] = title
+        #logger.debug( "제목 : " + title )
+
+        #아티스트
+        artist = ""
+        p = tree.xpath('/html/body/div[1]/article/div[2]/div/p')[0]
+        artist = p.text.strip()
+        allTag['artist'] = artist
+        #logger.debug( "아티스트 : " + artist )
+
+        #장르
+        genre = ""
+        span = tree.xpath('/html/body/div[1]/article/div[2]/ul/li[1]/span[2]')[0]
+        genre = span.text.strip()
+        allTag['genre'] = genre
+        #logger.debug( "장르 : " + genre )
+
+
+        
+        url = 'https://m.app.melon.com/album/music.htm?albumId='
+        url = '%s%s' % (url, urllib.quote(albumId))
+        
+        data = LogicNormal.get_html(url)
+        tree = html.fromstring(data)
+
+        p = tree.xpath('/html/body/section/div[2]/div[1]/div/div[2]/p[2]')
+        year = p[0].text[:4]
+        #제작년도
+        allTag['year'] = year
+        #logger.debug( "제작년도 : " + year )
+        
+        #트랙
+        track = "00"
+        lis = tree.xpath('/html/body/div[1]/article/div[2]/ul/li')
+        for i in range(1, len(lis)):
+            p = tree.xpath('/html/body/div[1]/article/div[2]/ul/li[%s]/div[2]/div/a/p' % i)[0]
+            if p.text.strip() == title:
+                div = tree.xpath('/html/body/div[1]/article/div[2]/ul/li[%s]/div[1]' % i)[0]
+                track = div.text_content().strip()
+        allTag['track'] = track
+        #logger.debug( "트랙 : " + track )
+        
+        #앨범이미지
+        albumImage = ""
+        meta = tree.xpath('/html/head/meta[6]')[0]
+        albumImage = meta.attrib.get("content")
+        allTag['albumImage'] = albumImage
+        #logger.debug( "앨범이미지 : " + albumImage )
+
+        #앨범
+        album = ""
+        p = tree.xpath('/html/body/section/div[2]/div[1]/div/div[2]/p[1]')[0]
+        album = p.text.strip()
+        allTag['album'] = album
+        #logger.debug( "앨범 : " + album )
+
+        #가사
+        url = 'https://m.app.melon.com/song/lyrics.htm?songId='
+        url = '%s%s' % (url, urllib.quote(songId))
+        
+        data = LogicNormal.get_html(url)
+        tree = html.fromstring(data)
+        
+        div = tree.xpath('/html/body/div[1]/article/div[2]/div[2]')[0]
+        from lxml.etree import tostring as htmlstring
+        lyrics = htmlstring(div, encoding='utf8')
+        lyrics = lyrics.replace('<div class="lyrics">',"")
+        lyrics = lyrics.replace("&#13;","")
+        lyrics = lyrics.replace("</div>","")
+        lyrics = lyrics.replace("<br/>","\n").strip()
+        allTag['lyrics'] = lyrics
+        #logger.debug( "가사 : " + lyrics )
+
+        return allTag
+
+    @staticmethod
+    def debugTest():
+
+        logger.debug("DEBUG TEST")
+
+
+
+        LogicNormal.getSongTag("1785912", "362766")
+        return
+        #logger.debug("file : " + str( file ))
+        
         
 
 
+        
+        
+        
+        
+        

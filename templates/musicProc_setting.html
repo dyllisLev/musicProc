@@ -21,7 +21,7 @@
       {{ macros.setting_input_text('singleCost', '단독매칭점수', value=arg['singleCost'], desc=['가수, 제목, 앨범 각각의 매칭점수 입니다.','각 점수 100으로 해당 설정 점수로 매칭을 판단합니다.','전체매칭점수와 단독매칭점수 두 조건의 AND 조건으로 판단합니다.']) }}
       {{ macros.setting_input_text('folderStructure', '폴더생성구조', value=arg['folderStructure'], desc=['폴더가 생성되는 구조입니다.','%title% : 노래제목','%artist% : 가수','%album% : 앨범명']) }}
       {{ macros.setting_checkbox('fileRename', '파일명 변경여부', value=arg['fileRename'], desc='On : MP3의 파일명을 변경합니다.') }}
-      {{ macros.setting_input_text('fileRenameSet', '파일명', value=arg['fileRenameSet'], desc=['파일명 변경여부가 On 일때 변경되는 파일명입니다.','%title% : 노래제목','%artist% : 가수','%album% : 앨범명']) }}
+      {{ macros.setting_input_text('fileRenameSet', '파일명', value=arg['fileRenameSet'], desc=['파일명 변경여부가 On 일때 변경되는 파일명입니다.','%title% : 노래제목','%artist% : 가수','%album% : 앨범명', '%track% : 트랙번호']) }}
 
       {{ macros.setting_input_text('interval', '건당처리지연시간', value=arg['interval'], desc=['기준단위 : 초','멜론의 경우 너무 빠른 반복조회시 오류가 발행합니다.']) }}
       {{ macros.setting_checkbox('notMp3delete', 'MP3 파일이 아닌경우 삭제', value=arg['notMp3delete'], desc='On : MP3 파일이 아닌경우 삭제 처리합니다.') }}
