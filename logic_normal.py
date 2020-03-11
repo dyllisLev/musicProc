@@ -368,10 +368,17 @@ class LogicNormal(object):
                         album = tags['album']
                         #트랙
                         track = tags['track']
+                        #발매년도
+                        year = tags['year']
+                        #장르
+                        genre = tags['genre']
 
                         folderStructure = folderStructure.replace('%title%', title)
                         folderStructure = folderStructure.replace('%artist%', artist)
                         folderStructure = folderStructure.replace('%album%', album)
+                        folderStructure = folderStructure.replace('%year%', year)
+                        folderStructure = folderStructure.replace('%genre%', genre)
+                        
                         #newFolderPath = os.path.join(organize_path, folderStructure)
                         newFolderPath = os.path.join(organize_path, os.path.sep.join(folderStructure.split('/')))
 
@@ -380,6 +387,8 @@ class LogicNormal(object):
                             fileRenameSet = fileRenameSet.replace('%artist%', artist)
                             fileRenameSet = fileRenameSet.replace('%album%', album)
                             fileRenameSet = fileRenameSet.replace('%track%', track)
+                            fileRenameSet = fileRenameSet.replace('%year%', year)
+                            fileRenameSet = fileRenameSet.replace('%genre%', genre)
                             
                             #fileRenameSet = os.path.join(newFolderPath,fileRenameSet)
                             fileRenameSet = os.path.join(newFolderPath,'%s%s' % (fileRenameSet, os.path.splitext(file)[1]))

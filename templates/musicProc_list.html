@@ -74,7 +74,7 @@ function make_list(data) {
   for (i in data) {
     str += m_row_start(0);
     str += '<div class="col-sm-2" style="text-align:center; word-break:break-all;font-weight:bold">';
-    str += data[i].status;
+    str += data[i].status+'<br/>'+data[i].created_time;
     str += '</div>';
     str += '<div class="col-sm-2" style="text-align:center; word-break:break-all;">';
     str += '<div style="position: inherit;top: 25px;">TAG 정보</div>';
