@@ -367,8 +367,7 @@ class LogicNormal(object):
                     titlelcs = LogicNormal.lcs(titlaByTag, title)
                     artistlcs = LogicNormal.lcs(artistByTag, artist)
                     albumlcs = LogicNormal.lcs(albumByTag, album)
-                    logger.debug( " PASS" )
-                    return
+                    
                     titleSimilarity = ( float(titlelcs) / float(titleMaxLength) ) * 100
                     artistSimilarity = ( float(artistlcs) / float(artistMaxLength) ) * 100
                     albumSimilarity = ( float(albumlcs) / float(albumMaxLength) ) * 100
