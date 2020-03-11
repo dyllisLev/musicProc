@@ -26,6 +26,9 @@
       {{ macros.setting_input_text('interval', '건당처리지연시간', value=arg['interval'], desc=['기준단위 : 초','멜론의 경우 너무 빠른 반복조회시 오류가 발행합니다.']) }}
       {{ macros.setting_checkbox('notMp3delete', 'MP3 파일이 아닌경우 삭제', value=arg['notMp3delete'], desc='On : MP3 파일이 아닌경우 삭제 처리합니다.') }}
       {{ macros.setting_checkbox('emptyFolderDelete', '빈폴더 삭제', value=arg['emptyFolderDelete'], desc='On : 작업후 빈폴더 삭제') }}
+      {{ macros.setting_checkbox('isEncoding', '인코딩변경 여부', value=arg['isEncoding'], desc='On : 작업시 인코딩을 변경후 작업') }}
+      {{ macros.setting_input_text('isEncodingType', '인코딩변경 타입', value=arg['isEncodingType'], desc=['인코딩변경 여부가 ON일때 해당하는 타입은 인코딩변경을 하고 작업이 시작됩니다.']) }}
+      
 
       {{ macros.setting_button([['global_reset_db_btn', '목록 초기화']], left='DB정리' ) }}
     {{ macros.m_tab_content_end() }}

@@ -44,7 +44,9 @@ class Logic(object):
         'notMp3delete' : 'False',
         'folderStructure' : '%artist%/%album%/',
         'fileRename' : 'False',
-        'fileRenameSet' : '%title% - %artist%'
+        'fileRenameSet' : '%track% - %title%',
+        'isEncoding' : 'True',
+        'isEncodingType' : 'MP3,M4A',
 
     }
 

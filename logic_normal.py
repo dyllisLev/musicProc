@@ -284,6 +284,8 @@ class LogicNormal(object):
         folderStructure = ModelSetting.get('folderStructure')
         fileRename = ModelSetting.get('fileRename')
         fileRenameSet = ModelSetting.get('fileRenameSet')
+
+        isEncodingType = ModelSetting.get('isEncodingType')
         
 
         ext = file.split(".")[-1]
@@ -291,8 +293,10 @@ class LogicNormal(object):
         if ext.upper() in "MP3|FLAC|M4A":
 
             #인코딩 변경
-            subprocess.check_output (['mid3iconv', '-e', 'cp949', os.path.join(file)])
-            
+            if ModelSetting.get_bool('isEncoding') and ext.upper() in isEncodingType:
+                logger.debug( "인코딩 변경 ")
+                subprocess.check_output (['mid3iconv', '-e', 'cp949', os.path.join(file)])
+                
             if os.path.isfile(file):
                 logger.debug("파일존재 확인"  + file)
                 
@@ -360,9 +364,9 @@ class LogicNormal(object):
                     else:
                         albumMaxLength = len(albumByTag)
                     
-                    logger.debug( "titlaByTag : " + str( titlaByTag )  + "|| title : " + str( title) + " || titleMaxLength : " + str( titleMaxLength) )
-                    logger.debug( "artistByTag : " + str( artistByTag ) + "|| artist : " + str( artist) + " || artistMaxLength : " + str( artistMaxLength) )
-                    logger.debug( "albumByTag : " + str( albumByTag ) + "|| album : " + str( album) + "|| albumMaxLength : " + str( albumMaxLength) )
+                    #logger.debug( "titlaByTag : " + str( titlaByTag )  + "|| title : " + str( title) + " || titleMaxLength : " + str( titleMaxLength) )
+                    #.debug( "artistByTag : " + str( artistByTag ) + "|| artist : " + str( artist) + " || artistMaxLength : " + str( artistMaxLength) )
+                    #logger.debug( "albumByTag : " + str( albumByTag ) + "|| album : " + str( album) + "|| albumMaxLength : " + str( albumMaxLength) )
                         
                     titlelcs = LogicNormal.lcs(titlaByTag, title)
                     artistlcs = LogicNormal.lcs(artistByTag, artist)
@@ -447,7 +451,7 @@ class LogicNormal(object):
                         status = "5"
                     else:
                         status = "3"
-                    logger.debug(status)
+                    #logger.debug(status)
                     LogicNormal.procSave(status , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
             else:
                 logger.debug("파일존재 미확인")
