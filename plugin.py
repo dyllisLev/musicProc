@@ -38,13 +38,13 @@ menu = {
     'sub' : [
         ['setting', '설정'], ['list', '목록'], ['log', '로그']
     ],
-    'category' : 'service'
+    'category' : 'fileprocess'
 }
 
 plugin_info = {
     'version' : '0.1.0.0',
     'name' : 'musicProc',
-    'category_name' : 'service',
+    'category_name' : 'fileprocess',
     'developer' : 'dyllis.lev',
     'description' : '음악정리',
     'home' : 'https://github.com/dyllisLev/musicProc',
