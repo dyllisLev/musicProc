@@ -126,6 +126,8 @@ class ModelItem(db.Model):
     albumByTag = db.Column(db.String)
     filePath = db.Column(db.String)
     searchKey = db.Column(db.String)
+    statusCd = db.Column(db.String)
+    
     #inqueue_time = db.Column(db.DateTime)
     #start_time = db.Column(db.DateTime)
     #end_time = db.Column(db.DateTime)
@@ -164,6 +166,8 @@ class ModelItem(db.Model):
             entity.albumByTag = unicode(d['albumByTag'])
             entity.filePath = unicode(d['filePath'])
             entity.searchKey = unicode(d['searchKey'])
+            entity.statusCd = unicode(d['statusCd'])
+            
             db.session.add(entity)
             db.session.commit()
         except Exception as e:
@@ -188,7 +192,7 @@ class ModelItem(db.Model):
             if search != '':
                 query = query.filter(class_is.title.like('%'+search+'%'))
             if option != 'all':
-                query = query.filter(class_is.status.like('%'+option+'%'))
+                query = query.filter(class_is.statusCd.like('%'+option+'%'))
             query = query.order_by(desc(class_is.id))
             count = query.count()
             query = query.limit(page_size).offset((page-1)*page_size)
@@ -223,6 +227,9 @@ class ModelItem(db.Model):
             if "searchKey" not in query.keys():
                 logger.debug( "migration !!")
                 sess.execute('ALTER TABLE musicProc_item ADD COLUMN searchKey VARCHAR')
+            if "statusCd" not in query.keys():
+                logger.debug( "migration !!")
+                sess.execute('ALTER TABLE musicProc_item ADD COLUMN statusCd VARCHAR')
             
         except Exception, e:
             logger.error('Exception:%s', e)

@@ -59,6 +59,8 @@ class LogicNormal(object):
     def scheduler_function():
         # 자동 추가 목록에 따라 큐에 집어넣음.
         try:
+            logger.debug("음악정리 시작!")
+            
             download_path = ModelSetting.get('download_path')
             organize_path = ModelSetting.get('proc_path')
             interval = ModelSetting.get('interval')
@@ -68,6 +70,7 @@ class LogicNormal(object):
             #return
             dirList = []
             fileList = []
+            
             for dir_path, dir_names, file_names in os.walk(download_path):
                 rootpath = os.path.join(os.path.abspath(download_path), dir_path)
                 
@@ -82,10 +85,12 @@ class LogicNormal(object):
                         time.sleep(int(interval))
                     except Exception as e:
                         try:
+                            logger.debug('Exception:%s', e)
+                            logger.debug(traceback.format_exc())
                             newFolderPath = os.path.join(ModelSetting.get('err_path'), "ERR")
                             newFilePath = os.path.join(newFolderPath, os.path.basename(file))
                             realFilePath = LogicNormal.fileMove(os.path.join(rootpath, file) , newFolderPath, newFilePath)
-                            LogicNormal.procSave("ERR" , "", "", "", "", "", "", "", realFilePath)
+                            LogicNormal.procSave("6" , "", "", "", "", "", "", "", realFilePath)
                             logger.debug('Exception:%s', e)
                             logger.debug(traceback.format_exc())
                         except Exception as e:
@@ -194,6 +199,8 @@ class LogicNormal(object):
     @staticmethod
     def lcs(a, b):
 
+        if len(a) == 0 or len(b) == 0:
+            return 0
         if a == b :
             if len(a)<len(b):
                 return len(b)
@@ -220,9 +227,9 @@ class LogicNormal(object):
     @staticmethod
     def fileMove(originPath , newFolderPath, newFilePath):
 
-        #if not os.path.isdir(newFolderPath):
-        logger.debug("폴더 생성 : " + newFolderPath)
-        os.makedirs(newFolderPath)
+        if not os.path.isdir(newFolderPath):
+            logger.debug("폴더 생성 : " + newFolderPath)
+            os.makedirs(newFolderPath)
         
         logger.debug("파일이동 시작")
         logger.debug(originPath + " ===>> " + newFilePath)
@@ -235,10 +242,24 @@ class LogicNormal(object):
         logger.debug("파일이동 완료")
         return newFilePath
     @staticmethod
-    def procSave(status , title, artist, album, titleByTag, artistByTag, albumByTag, searchKey, file):
+    def procSave(statusCd , title, artist, album, titleByTag, artistByTag, albumByTag, searchKey, file):
         entity = {}
         entity['id'] = ""
-        entity['status'] = status
+        entity['statusCd'] = statusCd
+
+        if statusCd == "1":
+            entity['status'] = "정상"
+        elif statusCd == "2":
+            entity['status'] = "중복"
+        elif statusCd == "3":
+            entity['status'] = "매칭실패"
+        elif statusCd == "4":
+            entity['status'] = "태그정보없음"
+        elif statusCd == "5":
+            entity['status'] = "검색결과없음"
+        elif statusCd == "6":
+            entity['status'] = "오류"
+
         entity['title'] = title
         entity['artist'] = artist
         entity['album'] = album
@@ -282,7 +303,7 @@ class LogicNormal(object):
                     newFolderPath = os.path.join(err_path, "nonTAG")
                     newFilePath = os.path.join(newFolderPath, os.path.basename(file))
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                    LogicNormal.procSave("태그정보 없음." , "", "", "", "", "", "", "", realFilePath)
+                    LogicNormal.procSave("4" , "", "", "", "", "", "", "", realFilePath)
                     return
                 
                 titlaByTag = tags['titlaByTag']
@@ -338,11 +359,16 @@ class LogicNormal(object):
                         albumMaxLength = len(album)
                     else:
                         albumMaxLength = len(albumByTag)
+                    
+                    logger.debug( "titlaByTag : " + str( titlaByTag )  + "|| title : " + str( title) + " || titleMaxLength : " + str( titleMaxLength) )
+                    logger.debug( "artistByTag : " + str( artistByTag ) + "|| artist : " + str( artist) + " || artistMaxLength : " + str( artistMaxLength) )
+                    logger.debug( "albumByTag : " + str( albumByTag ) + "|| album : " + str( album) + "|| albumMaxLength : " + str( albumMaxLength) )
                         
                     titlelcs = LogicNormal.lcs(titlaByTag, title)
                     artistlcs = LogicNormal.lcs(artistByTag, artist)
                     albumlcs = LogicNormal.lcs(albumByTag, album)
-                    
+                    logger.debug( " PASS" )
+                    return
                     titleSimilarity = ( float(titlelcs) / float(titleMaxLength) ) * 100
                     artistSimilarity = ( float(artistlcs) / float(artistMaxLength) ) * 100
                     albumSimilarity = ( float(albumlcs) / float(albumMaxLength) ) * 100
@@ -405,11 +431,11 @@ class LogicNormal(object):
                             newFolderPath = os.path.join( err_path, "fileDupe" )
                             newFilePath = os.path.join( newFolderPath, os.path.basename(file) )
                             realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                            LogicNormal.procSave("중복" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
+                            LogicNormal.procSave("2" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
                         else:
                             realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                            LogicNormal.procSave("정상" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
+                            LogicNormal.procSave("1" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
                     
                 if len(lis) < 1 or not match:
@@ -419,9 +445,9 @@ class LogicNormal(object):
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                     status = ""
                     if len(lis) < 1 :
-                        status = "검색결과없음"
+                        status = "5"
                     else:
-                        status = "매칭실패"
+                        status = "3"
                     logger.debug(status)
                     LogicNormal.procSave(status , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
             else:
