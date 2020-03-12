@@ -263,6 +263,8 @@ class LogicNormal(object):
             entity['status'] = "검색결과없음"
         elif statusCd == "6":
             entity['status'] = "오류"
+        elif statusCd == "7":
+            entity['status'] = "중복삭제"
 
         entity['title'] = title
         entity['artist'] = artist
@@ -438,10 +440,21 @@ class LogicNormal(object):
                         
                         if os.path.isfile(newFilePath):
                             
-                            newFilePath = file.replace(download_path,os.path.join(err_path, "fileDupe"))
-                            newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
-                            realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                            LogicNormal.procSave("2" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
+                            status = ""
+
+                            if ModelSetting.get_bool('isDupeDel'):
+                                logger.debug("중복 삭제 처리")
+                                os.remove(file)
+                                realFilePath = ""
+                                status = "7"
+                            else:
+                                newFilePath = file.replace(download_path,os.path.join(err_path, "fileDupe"))
+                                newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
+                                realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
+                                status = "2"
+                                
+                            
+                            LogicNormal.procSave(status , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
                             
                         else:

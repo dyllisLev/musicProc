@@ -44,6 +44,7 @@ class Logic(object):
         'fileRenameSet' : '%track% - %title%',
         'isEncoding' : 'True',
         'isEncodingType' : 'MP3,M4A',
+        'isDupeDel' : 'False'
 
     }
 
