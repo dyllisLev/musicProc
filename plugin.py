@@ -67,7 +67,7 @@ def process_telegram_data(data):
 #########################################################
 @blueprint.route('/')
 def home():
-    return redirect('/%s/setting' % package_name)
+    return redirect('/%s/list' % package_name)
 
 @blueprint.route('/<sub>')
 @login_required
