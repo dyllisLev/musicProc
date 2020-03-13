@@ -18,7 +18,7 @@ from lxml import html
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3, ID3NoHeaderError, APIC, TT2, TPE1, TRCK, TALB, USLT, error, TIT2
+from mutagen.id3 import ID3, ID3NoHeaderError, APIC, TT2, TPE1, TRCK, TALB, USLT, error, TIT2, TORY, TCON, TYER, USLT
 from mutagen.mp3 import EasyMP3 as MP3
 from mutagen.mp4 import MP4
 from mutagen.flac import FLAC
@@ -100,8 +100,9 @@ class LogicNormal(object):
 
             if ModelSetting.get_bool('emptyFolderDelete'):
                 for dir_path in dirList:
+                    logger.debug( "dir_path : " + dir_path)
                     if download_path != dir_path and len(os.listdir(dir_path)) == 0:
-                        os.rmdir(dir_path)
+                        os.rmdir(unicode(dir_path))
 
             logger.debug("===============END=================")
         except Exception as e:
@@ -192,6 +193,28 @@ class LogicNormal(object):
                 page_content = LogicNormal.session.get(url, headers=headers)
 
             data = page_content.text
+        except Exception as e:
+            logger.error('Exception:%s', e)
+            logger.error(traceback.format_exc())
+        return data
+    
+    @staticmethod
+    def get_img(url, referer=None, stream=False):
+        try:
+            data = ""
+
+            if LogicNormal.session is None:
+                LogicNormal.session = requests.session()
+            #logger.debug('get_html :%s', url)
+            headers['Referer'] = '' if referer is None else referer
+            try:
+                page_content = LogicNormal.session.get(url, headers=headers)
+            except Exception as e:
+                logger.debug("Connection aborted!!!!!!!!!!!")
+                time.sleep(10) #Connection aborted 시 10초 대기 후 다시 시작
+                page_content = LogicNormal.session.get(url, headers=headers)
+
+            data = page_content
         except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
@@ -292,6 +315,7 @@ class LogicNormal(object):
         fileRenameSet = ModelSetting.get('fileRenameSet')
 
         isEncodingType = ModelSetting.get('isEncodingType')
+        isTagUpdate = ModelSetting.get('isTagUpdate')
         
 
         ext = file.split(".")[-1]
@@ -441,7 +465,7 @@ class LogicNormal(object):
                         if os.path.isfile(newFilePath):
                             
                             status = ""
-
+                            
                             if ModelSetting.get_bool('isDupeDel'):
                                 logger.debug("중복 삭제 처리")
                                 os.remove(file)
@@ -452,12 +476,16 @@ class LogicNormal(object):
                                 newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                                 realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                                 status = "2"
-                                
                             
                             LogicNormal.procSave(status , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
                             
                         else:
+
+                            if ModelSetting.get_bool('isTagUpdate'):
+                                logger.debug( "테그 정보 업데이트 ")
+                                LogicNormal.tagUpdateAll(file, tags)
+                                
                             realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                             LogicNormal.procSave("1" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
@@ -641,13 +669,89 @@ class LogicNormal(object):
         return allTag
 
     @staticmethod
+    def tagUpdateAll(filePath, tags):
+
+        album = tags['album']
+        lyrics = tags['lyrics']
+        artist = tags['artist']
+        track = tags['track']
+        title = tags['title']
+        albumImage = tags['albumImage']
+        year = tags['year']
+        genre = tags['genre']
+
+        """
+        logger.debug( "album \t: " + album )
+        logger.debug( "lyrics \t: " + lyrics )
+        logger.debug( "artist \t: " + artist )
+        logger.debug( "track \t: " + track )
+        logger.debug( "title \t: " + title )
+        logger.debug( "albumImage \t: " + albumImage )
+        logger.debug( "year \t: " + year )
+        logger.debug( "genre \t: " + genre )
+        """
+        
+        if os.path.isfile(filePath):
+            logger.debug("파일존재 확인"  + filePath)
+            ext = filePath.split(".")[-1]
+
+            if ext.upper() == "MP3":
+                try:
+                    audio = ID3(filePath)
+                    audio.add(TALB(text=[unicode(album)]))
+                    audio.add(TIT2(text=[unicode(title)]))
+                    audio.add(TPE1(text=[unicode(artist)]))
+                    audio.add(TRCK(text=[unicode(track)]))
+                    audio.add(TYER(text=[unicode(year)]))
+                    audio.add(TCON(text=[unicode(genre)]))
+                    audio.add(USLT(text=lyrics, lang="kor", desc=""))
+                    
+                    from PIL import Image
+                    import requests
+
+                    coverFile = os.path.join(path_app_root, 'data', 'tmp', 'cover.jpg')
+                    im = Image.open(requests.get(albumImage, stream=True).raw)
+
+                    if os.path.isfile(coverFile):
+                        os.remove(coverFile)
+                    
+                    im.save(coverFile)
+                    audio.add(APIC(encoding=3, mime='image/jpg', type=3, desc=u'Cover', data=open(coverFile, 'rb').read()))
+
+                    audio.save()
+                except ID3NoHeaderError:
+                    logger.debug("MP3 except")
+                    audio = ID3()
+                    audio.add(TALB(text=[unicode(album)]))
+                    audio.add(TIT2(text=[unicode(title)]))
+                    audio.add(TPE1(text=[unicode(artist)]))
+                    audio.add(TRCK(text=[unicode(track)]))
+                    audio.add(TYER(text=[unicode(year)]))
+                    audio.add(TCON(text=[unicode(genre)]))
+                    audio.add(USLT(text=[unicode(str(lyrics))], lang="kor", desc=""))
+                    from PIL import Image
+                    import requests
+
+                    coverFile = os.path.join(path_app_root, 'data', 'tmp', 'cover.jpg')
+                    im = Image.open(requests.get(albumImage, stream=True).raw)
+
+                    if os.path.isfile(coverFile):
+                        os.remove(coverFile)
+                    
+                    im.save(coverFile)
+                    audio.add(APIC(encoding=3, mime='image/jpg', type=3, desc=u'Cover', data=open(coverFile, 'rb').read()))
+
+
+                    audio.save(filePath)
+
+    @staticmethod
     def debugTest():
 
-        logger.debug("DEBUG TEST")
+        filePath = "/app/data/gdriveTeam/JOB/proc/ps1/music/step1/05. 감사 - 홍경민(2008,발라드, 국내드라마).mp3"
+        tags = LogicNormal.getSongTag("1785912", "362766")
 
-
-
-        LogicNormal.getSongTag("32450870", "10401423")
+        LogicNormal.tagUpdateAll(filePath, tags)
+        
         return
         #logger.debug("file : " + str( file ))
         
