@@ -99,6 +99,7 @@ class LogicNormal(object):
                             logger.debug(traceback.format_exc())
 
             if ModelSetting.get_bool('emptyFolderDelete'):
+                dirList.reverse()
                 for dir_path in dirList:
                     logger.debug( "dir_path : " + dir_path)
                     if download_path != dir_path and len(os.listdir(dir_path)) == 0:
@@ -690,7 +691,7 @@ class LogicNormal(object):
         logger.debug( "year \t: " + year )
         logger.debug( "genre \t: " + genre )
         """
-        
+
         if os.path.isfile(filePath):
             logger.debug("파일존재 확인"  + filePath)
             ext = filePath.split(".")[-1]
