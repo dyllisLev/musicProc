@@ -265,7 +265,7 @@ class LogicNormal(object):
             os.remove(newFilePath)
         
         import shutil
-        #shutil.move(originPath, newFilePath)
+        shutil.move(originPath, newFilePath)
         logger.debug("파일이동 완료")
         
         return newFilePath
