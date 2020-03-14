@@ -265,7 +265,7 @@ class LogicNormal(object):
             os.remove(newFilePath)
         
         import shutil
-        shutil.move(originPath, newFilePath)
+        #shutil.move(originPath, newFilePath)
         logger.debug("파일이동 완료")
         
         return newFilePath
@@ -443,8 +443,9 @@ class LogicNormal(object):
                         folderStructure = folderStructure.replace('%genre%', genre)
                         
                         #newFolderPath = os.path.join(organize_path, folderStructure)
-                        newFolderPath = os.path.join(organize_path, os.path.sep.join(folderStructure.split('/')))
-
+                        newFolderPath = os.path.join(os.path.sep.join(folderStructure.split('/')))
+                        newFolderPath = os.path.join(organize_path + newFolderPath)
+                        
                         if ModelSetting.get_bool('fileRename'):
                             fileRenameSet = fileRenameSet.replace('%title%', title)
                             fileRenameSet = fileRenameSet.replace('%artist%', artist)
@@ -460,7 +461,7 @@ class LogicNormal(object):
                         
                         newFilePath = os.path.join(newFolderPath, fileRenameSet )
                         newFolderPath = newFolderPath.replace('"',"'")
-                        
+
                         match = True
                         
                         if os.path.isfile(newFilePath):
@@ -486,7 +487,11 @@ class LogicNormal(object):
                             if ModelSetting.get_bool('isTagUpdate'):
                                 logger.debug( "테그 정보 업데이트 ")
                                 LogicNormal.tagUpdateAll(file, tags)
-                                
+                            
+                            logger.debug("정상!!!")
+                            logger.debug("file : %s", file)
+                            logger.debug(" os.path.join(newFolderPath) : %s",  os.path.join(newFolderPath))
+                            logger.debug(" os.path.join(newFilePath) : %s",  os.path.join(newFilePath))
                             realFilePath = LogicNormal.fileMove(file , os.path.join(newFolderPath), os.path.join(newFilePath))
                             LogicNormal.procSave("1" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
@@ -550,6 +555,8 @@ class LogicNormal(object):
     @staticmethod
     def getSongTag(songId, albumId):
         
+        logger.debug("songId : %s" , songId)
+        logger.debug("albumId : %s" , albumId)
         allTag = {}
 
         url = 'https://m.app.melon.com/song/detail.htm?songId='
@@ -588,9 +595,12 @@ class LogicNormal(object):
         tree = html.fromstring(data)
 
         p = tree.xpath('/html/body/section/div[2]/div[1]/div/div[2]/p[2]')
-        year = p[0].text[:4]
         #제작년도
-        allTag['year'] = year
+        try:
+            year = p[0].text[:4]
+            allTag['year'] = year
+        except Exception as e:
+            allTag['year'] = ""
         #logger.debug( "제작년도 : " + year )
         
         #트랙
@@ -711,13 +721,22 @@ class LogicNormal(object):
                     import requests
 
                     coverFile = os.path.join(path_app_root, 'data', 'tmp', 'cover.jpg')
-                    im = Image.open(requests.get(albumImage, stream=True).raw)
-
                     if os.path.isfile(coverFile):
                         os.remove(coverFile)
+
+                    logger.debug("albumImage : %s " , albumImage)
+                    res = requests.get(albumImage, stream=True)
                     
-                    im.save(coverFile)
-                    audio.add(APIC(encoding=3, mime='image/jpg', type=3, desc=u'Cover', data=open(coverFile, 'rb').read()))
+                    if "png".upper() in res.headers['Content-Type'].upper():
+                        im = Image.open(res.raw)
+                        bg = Image.new("RGB", im.size, (255,255,255))
+                        bg.paste(im,im)
+                        bg.save(coverFile)
+                    else:
+                        im = Image.open(res.raw)
+                        im.save(coverFile)
+
+                    audio.add(APIC(encoding=3, mime=res.headers['Content-Type'], type=3, desc=u'Cover', data=open(coverFile, 'rb').read()))
 
                     audio.save()
                 except ID3NoHeaderError:
