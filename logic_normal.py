@@ -91,7 +91,7 @@ class LogicNormal(object):
 
                             newFilePath = file.replace(os.path.join(download_path),os.path.join(err_path, "ERR"))
                             newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
-                            realFilePath = LogicNormal.fileMove(os.path.join(rootpath, file) , newFolderPath, newFilePath)
+                            realFilePath = LogicNormal.fileMove(os.path.join(file) , newFolderPath, newFilePath)
                             LogicNormal.procSave("6" , "", "", "", "", "", "", "", realFilePath)
                             
                         except Exception as e:
@@ -748,7 +748,7 @@ class LogicNormal(object):
     @staticmethod
     def debugTest():
 
-        filePath = "/volume1/RcloneDrive/Downloads/offcloud/Music/[ 2020년 1월 1일 - 2020년 1월 4일 신곡 모음 ]/스컬러(SKOLOR) ['19 MATERIA (EP)]/스컬러(SKOLOR) ['19 MATERIA (EP)] - 03 NeeDU:hearts:.mp3"
+        #filePath = "/volume1/RcloneDrive/Downloads/offcloud/Music/[ 2020년 1월 1일 - 2020년 1월 4일 신곡 모음 ]/스컬러(SKOLOR) ['19 MATERIA (EP)]/스컬러(SKOLOR) ['19 MATERIA (EP)] - 03 NeeDU:hearts:.mp3"
         #tags = LogicNormal.getSongTag("1785912", "362766")
 
         #LogicNormal.tagUpdateAll(filePath, tags)
