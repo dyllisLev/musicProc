@@ -89,7 +89,7 @@ class LogicNormal(object):
                             logger.debug('Exception:%s', e)
                             logger.debug(traceback.format_exc())
 
-                            newFilePath = file.replace(download_path,os.path.join(err_path, "ERR"))
+                            newFilePath = file.replace(os.path.join(download_path),os.path.join(err_path, "ERR"))
                             newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                             realFilePath = LogicNormal.fileMove(os.path.join(rootpath, file) , newFolderPath, newFilePath)
                             LogicNormal.procSave("6" , "", "", "", "", "", "", "", realFilePath)
@@ -334,7 +334,7 @@ class LogicNormal(object):
                 tags = LogicNormal.getTagInfo(file)
                 
                 if tags == {} :
-                    newFilePath = file.replace(download_path,os.path.join(err_path, "nonTAG"))
+                    newFilePath = file.replace(os.path.join(download_path),os.path.join(err_path, "nonTAG"))
                     newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                     LogicNormal.procSave("4" , "", "", "", "", "", "", "", realFilePath)
@@ -473,7 +473,7 @@ class LogicNormal(object):
                                 realFilePath = ""
                                 status = "7"
                             else:
-                                newFilePath = file.replace(download_path,os.path.join(err_path, "fileDupe"))
+                                newFilePath = file.replace(os.path.join(download_path),os.path.join(err_path, "fileDupe"))
                                 newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                                 realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                                 status = "2"
@@ -487,13 +487,13 @@ class LogicNormal(object):
                                 logger.debug( "테그 정보 업데이트 ")
                                 LogicNormal.tagUpdateAll(file, tags)
                                 
-                            realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
+                            realFilePath = LogicNormal.fileMove(file , os.path.join(newFolderPath), os.path.join(newFilePath))
                             LogicNormal.procSave("1" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
                     
                 if len(lis) < 1 or not match:
                     
-                    newFilePath = file.replace(download_path,os.path.join(err_path, "nonSearch"))
+                    newFilePath = file.replace(os.path.join(download_path),os.path.join(err_path, "nonSearch"))
                     newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                     status = ""
@@ -748,11 +748,17 @@ class LogicNormal(object):
     @staticmethod
     def debugTest():
 
-        filePath = "/app/data/gdriveTeam/JOB/proc/ps1/music/step1/05. 감사 - 홍경민(2008,발라드, 국내드라마).mp3"
-        tags = LogicNormal.getSongTag("1785912", "362766")
+        filePath = "/volume1/RcloneDrive/Downloads/offcloud/Music/[ 2020년 1월 1일 - 2020년 1월 4일 신곡 모음 ]/스컬러(SKOLOR) ['19 MATERIA (EP)]/스컬러(SKOLOR) ['19 MATERIA (EP)] - 03 NeeDU:hearts:.mp3"
+        #tags = LogicNormal.getSongTag("1785912", "362766")
 
-        LogicNormal.tagUpdateAll(filePath, tags)
-        
+        #LogicNormal.tagUpdateAll(filePath, tags)
+        download_path = "/volume1/RcloneDrive/Downloads/offcloud/Music/"
+        err_path = "/volume1/RcloneDrive/Downloads/offcloud/Music/"
+
+        newFilePath = filePath.replace(os.path.join(download_path),os.path.join(err_path, "ERR"))
+        newFolderPath = os.path.join(newFilePath.replace(os.path.basename(filePath),""))
+        logger.debug("newFilePath : " + newFilePath)
+        logger.debug("newFolderPath : " + newFolderPath)
         return
         #logger.debug("file : " + str( file ))
         
