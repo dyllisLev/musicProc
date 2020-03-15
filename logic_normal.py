@@ -86,8 +86,10 @@ class LogicNormal(object):
                         time.sleep(int(interval))
                     except Exception as e:
                         try:
+                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 작업중 오류]]].============'', e)
                             logger.debug('Exception:%s', e)
                             logger.debug(traceback.format_exc())
+                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 작업중 오류]]].============'', e)
 
                             newFilePath = file.replace(download_path, "")
                             newFilePath = os.path.join('%s%s%s%s%s' % (err_path, os.path.sep, 'ERR', os.path.sep, newFilePath)).replace(str(os.path.sep+os.path.sep),str(os.path.sep))
@@ -97,8 +99,10 @@ class LogicNormal(object):
                             LogicNormal.procSave("6" , "", "", "", "", "", "", "", realFilePath)
                             
                         except Exception as e:
+                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 작업중 오류]]].============'', e)
                             logger.debug('Exception:%s', e)
                             logger.debug(traceback.format_exc())
+                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 오류처리중 오류]]].============'', e)
 
             if ModelSetting.get_bool('emptyFolderDelete'):
                 dirList.reverse()
