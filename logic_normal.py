@@ -81,6 +81,7 @@ class LogicNormal(object):
                 for file in file_names:
 
                     try:
+                        
                         filepath = os.path.join(rootpath, file)
                         LogicNormal.mp3FileProc(filepath)
                         time.sleep(int(interval))
@@ -89,9 +90,13 @@ class LogicNormal(object):
                             logger.debug('Exception:%s', e)
                             logger.debug(traceback.format_exc())
 
-                            newFilePath = file.replace(os.path.join(download_path),os.path.join(err_path, "ERR"))
+                            newFilePath = file.replace(download_path, "")
+                            newFilePath = os.path.join('ERR', newFilePath)
+                            newFilePath = os.path.join('%s%s' % (err_path, newFilePath))
+                            
                             newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
-                            realFilePath = LogicNormal.fileMove(os.path.join(file) , newFolderPath, newFilePath)
+                            realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
+                            
                             LogicNormal.procSave("6" , "", "", "", "", "", "", "", realFilePath)
                             
                         except Exception as e:
@@ -334,9 +339,14 @@ class LogicNormal(object):
                 tags = LogicNormal.getTagInfo(file)
                 
                 if tags == {} :
-                    newFilePath = file.replace(os.path.join(download_path),os.path.join(err_path, "nonTAG"))
+
+                    newFilePath = file.replace(download_path, "")
+                    newFilePath = os.path.join('nonTAG', newFilePath)
+                    newFilePath = os.path.join('%s%s' % (err_path, newFilePath))
+                    
                     newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
+
                     LogicNormal.procSave("4" , "", "", "", "", "", "", "", realFilePath)
                     return
                 
@@ -442,10 +452,6 @@ class LogicNormal(object):
                         folderStructure = folderStructure.replace('%year%', year)
                         folderStructure = folderStructure.replace('%genre%', genre)
                         
-                        #newFolderPath = os.path.join(organize_path, folderStructure)
-                        newFolderPath = os.path.join(os.path.sep.join(folderStructure.split('/')))
-                        newFolderPath = os.path.join(organize_path + newFolderPath)
-                        
                         if ModelSetting.get_bool('fileRename'):
                             fileRenameSet = fileRenameSet.replace('%title%', title)
                             fileRenameSet = fileRenameSet.replace('%artist%', artist)
@@ -454,13 +460,18 @@ class LogicNormal(object):
                             fileRenameSet = fileRenameSet.replace('%year%', year)
                             fileRenameSet = fileRenameSet.replace('%genre%', genre)
                             
-                            #fileRenameSet = os.path.join(newFolderPath,fileRenameSet)
-                            fileRenameSet = os.path.join(newFolderPath,'%s%s' % (fileRenameSet, os.path.splitext(file)[1]))
+                            fileRenameSet = os.path.join('%s%s' % (fileRenameSet, os.path.splitext(file)[1]))
                         else:
                             fileRenameSet = os.path.basename(file)
                         
-                        newFilePath = os.path.join(newFolderPath, fileRenameSet )
-                        newFolderPath = newFolderPath.replace('"',"'")
+                        #logger.debug("folderStructure : %s", folderStructure)
+                        #logger.debug("fileRenameSet : %s", fileRenameSet)
+                        #logger.debug("os.path.sep : %s", os.path.sep)
+                        #logger.debug("organize_path : %s", organize_path)
+
+                        newFilePath = os.path.join('%s%s%s' % (organize_path, folderStructure, fileRenameSet))
+                        newFolderPath = os.path.join('%s%s' % (organize_path, folderStructure))
+                        
 
                         match = True
                         
@@ -474,7 +485,13 @@ class LogicNormal(object):
                                 realFilePath = ""
                                 status = "7"
                             else:
-                                newFilePath = file.replace(os.path.join(download_path),os.path.join(err_path, "fileDupe"))
+
+                                logger.debug("중복!!")
+
+                                newFilePath = file.replace(download_path, "")
+                                newFilePath = os.path.join('fileDupe', newFilePath)
+                                newFilePath = os.path.join('%s%s' % (err_path, newFilePath))
+                                
                                 newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                                 realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                                 status = "2"
@@ -488,17 +505,16 @@ class LogicNormal(object):
                                 logger.debug( "테그 정보 업데이트 ")
                                 LogicNormal.tagUpdateAll(file, tags)
                             
-                            logger.debug("정상!!!")
-                            logger.debug("file : %s", file)
-                            logger.debug(" os.path.join(newFolderPath) : %s",  os.path.join(newFolderPath))
-                            logger.debug(" os.path.join(newFilePath) : %s",  os.path.join(newFilePath))
                             realFilePath = LogicNormal.fileMove(file , os.path.join(newFolderPath), os.path.join(newFilePath))
                             LogicNormal.procSave("1" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
                     
                 if len(lis) < 1 or not match:
                     
-                    newFilePath = file.replace(os.path.join(download_path),os.path.join(err_path, "nonSearch"))
+                    newFilePath = file.replace(download_path, "")
+                    newFilePath = os.path.join('nonSearch', newFilePath)
+                    newFilePath = os.path.join('%s%s' % (err_path, newFilePath))
+                    
                     newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                     status = ""
@@ -600,7 +616,7 @@ class LogicNormal(object):
             year = p[0].text[:4]
             allTag['year'] = year
         except Exception as e:
-            allTag['year'] = ""
+            allTag['year'] = "none"
         #logger.debug( "제작년도 : " + year )
         
         #트랙
