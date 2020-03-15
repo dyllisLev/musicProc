@@ -81,7 +81,6 @@ class LogicNormal(object):
                 for file in file_names:
 
                     try:
-                        
                         filepath = os.path.join(rootpath, file)
                         LogicNormal.mp3FileProc(filepath)
                         time.sleep(int(interval))
@@ -91,12 +90,10 @@ class LogicNormal(object):
                             logger.debug(traceback.format_exc())
 
                             newFilePath = file.replace(download_path, "")
-                            newFilePath = os.path.join('ERR', newFilePath)
-                            newFilePath = os.path.join('%s%s' % (err_path, newFilePath))
-                            
+                            newFilePath = os.path.join('%s%s%s%s%s' % (err_path, os.path.sep, 'ERR', os.path.sep, newFilePath)).replace(str(os.path.sep+os.path.sep),str(os.path.sep))
                             newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                             realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
-                            
+
                             LogicNormal.procSave("6" , "", "", "", "", "", "", "", realFilePath)
                             
                         except Exception as e:
@@ -341,9 +338,7 @@ class LogicNormal(object):
                 if tags == {} :
 
                     newFilePath = file.replace(download_path, "")
-                    newFilePath = os.path.join('nonTAG', newFilePath)
-                    newFilePath = os.path.join('%s%s' % (err_path, newFilePath))
-                    
+                    newFilePath = os.path.join('%s%s%s%s%s' % (err_path, os.path.sep, 'nonTAG', os.path.sep, newFilePath)).replace(str(os.path.sep+os.path.sep),str(os.path.sep))
                     newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
 
@@ -464,14 +459,16 @@ class LogicNormal(object):
                         else:
                             fileRenameSet = os.path.basename(file)
                         
-                        #logger.debug("folderStructure : %s", folderStructure)
-                        #logger.debug("fileRenameSet : %s", fileRenameSet)
-                        #logger.debug("os.path.sep : %s", os.path.sep)
-                        #logger.debug("organize_path : %s", organize_path)
+                        logger.debug("folderStructure : %s", folderStructure)
+                        logger.debug("fileRenameSet : %s", fileRenameSet)
+                        logger.debug("os.path.sep : %s", os.path.sep)
+                        logger.debug("organize_path : %s", organize_path)
 
-                        newFilePath = os.path.join('%s%s%s' % (organize_path, folderStructure, fileRenameSet))
-                        newFolderPath = os.path.join('%s%s' % (organize_path, folderStructure))
-                        
+                        newFilePath = os.path.join('%s%s%s%s%s' % (organize_path, os.path.sep, folderStructure, os.path.sep, fileRenameSet)).replace("//","/")
+                        newFolderPath = os.path.join('%s%s%s' % (organize_path, os.path.sep, folderStructure)).replace("//","/")
+
+                        logger.debug("newFilePath : %s", newFilePath)
+                        logger.debug("newFolderPath : %s", newFolderPath)
 
                         match = True
                         
@@ -486,12 +483,8 @@ class LogicNormal(object):
                                 status = "7"
                             else:
 
-                                logger.debug("중복!!")
-
                                 newFilePath = file.replace(download_path, "")
-                                newFilePath = os.path.join('fileDupe', newFilePath)
-                                newFilePath = os.path.join('%s%s' % (err_path, newFilePath))
-                                
+                                newFilePath = os.path.join('%s%s%s%s%s' % (err_path, os.path.sep, 'fileDupe', os.path.sep, newFilePath)).replace(str(os.path.sep+os.path.sep),str(os.path.sep))
                                 newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                                 realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                                 status = "2"
@@ -512,9 +505,7 @@ class LogicNormal(object):
                 if len(lis) < 1 or not match:
                     
                     newFilePath = file.replace(download_path, "")
-                    newFilePath = os.path.join('nonSearch', newFilePath)
-                    newFilePath = os.path.join('%s%s' % (err_path, newFilePath))
-                    
+                    newFilePath = os.path.join('%s%s%s%s%s' % (err_path, os.path.sep, 'nonSearch', os.path.sep, newFilePath)).replace(str(os.path.sep+os.path.sep),str(os.path.sep))
                     newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
                     realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
                     status = ""
