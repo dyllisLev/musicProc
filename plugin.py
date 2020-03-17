@@ -17,7 +17,7 @@ from system.logic import SystemLogic
 from framework.common.torrent.process import TorrentProcess
 
 # 패키지
-# 로그
+# 로그 
 package_name = __name__.split('.')[0]
 logger = get_logger(package_name)
 

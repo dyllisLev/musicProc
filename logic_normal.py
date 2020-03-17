@@ -687,7 +687,7 @@ class LogicNormal(object):
 
         return allTag
 
-    @staticmethod
+    @staticmethod 
     def tagUpdateAll(filePath, tags):
 
         album = tags['album']

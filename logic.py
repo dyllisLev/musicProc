@@ -14,7 +14,7 @@ from framework import db, scheduler, path_data, celery
 from framework.job import Job
 from framework.util import Util
 
-# 패키지
+# 패키지 
 from .plugin import logger, package_name
 from .model import ModelSetting, ModelItem
 
