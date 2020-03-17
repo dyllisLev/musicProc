@@ -9,6 +9,7 @@
     {{ macros.m_tab_head_start() }}
       {{ macros.m_tab_head2('normal', '일반', true) }}
       {{ macros.m_tab_head2('auto', '자동', false) }}
+      {{ macros.m_tab_head2('manage', '관리', false) }}
     {{ macros.m_tab_head_end() }}
   </nav>
   <form id='setting' name='setting'>
@@ -39,6 +40,8 @@
       {{ macros.setting_input_int('schedulerInterval', '스케쥴링 실행 주기', value=arg['schedulerInterval'], min='1', placeholder='10', desc='minute 단위') }}
       {{ macros.setting_checkbox('auto_start', '시작시 자동실행', value=arg['auto_start'], desc='On : 시작시 자동으로 스케쥴러에 등록됩니다.') }}
       {{ macros.setting_button([['global_one_execute_btn', '1회 실행']], left='1회 실행' ) }}
+    {{ macros.m_tab_content_end() }}
+    {{ macros.m_tab_content_start('manage', false) }}
     {{ macros.m_tab_content_end() }}
   </div><!--tab-content-->
 </form>

@@ -86,10 +86,10 @@ class LogicNormal(object):
                         time.sleep(int(interval))
                     except Exception as e:
                         try:
-                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 작업중 오류]]].============'', e)
+                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 작업중 오류]]].============')
                             logger.debug('Exception:%s', e)
                             logger.debug(traceback.format_exc())
-                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 작업중 오류]]].============'', e)
+                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 작업중 오류]]].============')
 
                             newFilePath = file.replace(download_path, "")
                             newFilePath = os.path.join('%s%s%s%s%s' % (err_path, os.path.sep, 'ERR', os.path.sep, newFilePath)).replace(str(os.path.sep+os.path.sep),str(os.path.sep))
@@ -99,10 +99,10 @@ class LogicNormal(object):
                             LogicNormal.procSave("6" , "", "", "", "", "", "", "", realFilePath)
                             
                         except Exception as e:
-                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 작업중 오류]]].============'', e)
+                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 작업중 오류]]].============')
                             logger.debug('Exception:%s', e)
                             logger.debug(traceback.format_exc())
-                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 오류처리중 오류]]].============'', e)
+                            logger.debug('=========오류 문의시 필수 첨부해 주세요 [음악정리 작업중 오류]]].============')
 
             if ModelSetting.get_bool('emptyFolderDelete'):
                 dirList.reverse()
@@ -200,28 +200,6 @@ class LogicNormal(object):
                 page_content = LogicNormal.session.get(url, headers=headers)
 
             data = page_content.text
-        except Exception as e:
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-        return data
-    
-    @staticmethod
-    def get_img(url, referer=None, stream=False):
-        try:
-            data = ""
-
-            if LogicNormal.session is None:
-                LogicNormal.session = requests.session()
-            #logger.debug('get_html :%s', url)
-            headers['Referer'] = '' if referer is None else referer
-            try:
-                page_content = LogicNormal.session.get(url, headers=headers)
-            except Exception as e:
-                logger.debug("Connection aborted!!!!!!!!!!!")
-                time.sleep(10) #Connection aborted 시 10초 대기 후 다시 시작
-                page_content = LogicNormal.session.get(url, headers=headers)
-
-            data = page_content
         except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
@@ -774,23 +752,124 @@ class LogicNormal(object):
 
 
                     audio.save(filePath)
+    @staticmethod
+    def file2md5(filename):
+        import hashlib, codecs
+        md5 = hashlib.md5()
+        logger.debug('file2md5 filename %s' % filename)
+        filename = unicode(filename)
+        f = open(filename, 'rb')
+        tag = f.read(3)
+        if tag == 'ID3':
+            f.read(3)
+            id3Size = f.read(4)
+            ii0 = int(codecs.encode(id3Size[0], 'hex'), 16)
+            ii1 = int(codecs.encode(id3Size[1], 'hex'), 16)
+            ii2 = int(codecs.encode(id3Size[2], 'hex'), 16)
+            ii3 = int(codecs.encode(id3Size[3], 'hex'), 16)
+            size = ii0 << 21 | ii1 << 14 | ii2 << 7 | ii3
+            seekpos = size+10
 
+            #blank
+            f.seek(seekpos)
+            for i in range(0, 50000):
+                ii0 = int(codecs.encode(f.read(1), 'hex'), 16)
+                if ii0 == 255:
+                    ii1 = int(codecs.encode(f.read(1), 'hex'), 16)
+                    if (ii1 >> 5) == 7:
+                        seekpos = seekpos + i
+                        logger.debug('SEEKPOS %s ' % seekpos)
+                        break
+        else:
+            seekpos = 0
+        
+        f.seek(seekpos)
+        chunk = f.read(163840)
+        md5.update(chunk)
+        f.close()
+        tmp = md5.hexdigest()
+        logger.debug('filename:%s md5:%s', filename, tmp)
+        return tmp
+    @staticmethod
+    def alsong(musicmd5):
+        url = 'http://lyrics.alsong.co.kr/alsongwebservice/service1.asmx'
+        #postData = "<?xml version='1.0' encoding='UTF-8'?><SOAP-ENV:Envelope  xmlns:SOAP-ENV='http://www.w3.org/2003/05/soap-envelope' xmlns:SOAP-ENC='http://www.w3.org/2003/05/soap-encoding' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:xsd='http://www.w3.org/2001/XMLSchema' xmlns:ns2='ALSongWebServer/Service1Soap' xmlns:ns1='ALSongWebServer' xmlns:ns3='ALSongWebServer/Service1Soap12'><SOAP-ENV:Body><ns1:GetLyric5><ns1:stQuery><ns1:strChecksum>" + musicmd5 + "</ns1:strChecksum><ns1:strVersion>3.36</ns1:strVersion><ns1:strMACAddress>00ff667f9a08</ns1:strMACAddress><ns1:strIPAddress>xxx.xxx.xxx.xxx</ns1:strIPAddress></ns1:stQuery></ns1:GetLyric5></SOAP-ENV:Body></SOAP-ENV:Envelope>"
+        postData = '<?xml version="1.0" encoding="UTF-8"?>\n<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://www.w3.org/2003/05/soap-envelope" xmlns:SOAP-ENC="http://www.w3.org/2003/05/soap-encoding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ns2="ALSongWebServer/Service1Soap" xmlns:ns1="ALSongWebServer" xmlns:ns3="ALSongWebServer/Service1Soap12"><SOAP-ENV:Body><ns1:GetLyric7><ns1:encData>7c2d15b8f51ac2f3b2a37d7a445c3158455defb8a58d621eb77a3ff8ae4921318e49cefe24e515f79892a4c29c9a3e204358698c1cfe79c151c04f9561e945096ccd1d1c0a8d8f265a2f3fa7995939b21d8f663b246bbc433c7589da7e68047524b80e16f9671b6ea0faaf9d6cde1b7dbcf1b89aa8a1d67a8bbc566664342e12</ns1:encData><ns1:stQuery><ns1:strChecksum>%s</ns1:strChecksum><ns1:strVersion></ns1:strVersion><ns1:strMACAddress></ns1:strMACAddress><ns1:strIPAddress></ns1:strIPAddress></ns1:stQuery></ns1:GetLyric7></SOAP-ENV:Body></SOAP-ENV:Envelope>' % musicmd5
+        #headers = {'content-type': 'application/soap+xml; charset=utf-8', 'User-Agent': 'gSOAP/2.7', 'Host':'lyrics.alsong.co.kr', 'SOAPAction':'ALSongWebServer/GetLyric7', 'Content-Length':len(postData) }
+        headers = {'content-type': 'application/soap+xml; charset=utf-8'}
+        try:
+            page = requests.post(url, data=postData, headers=headers)
+        except Exception as e:
+            logger.debug('Exception:%s', e)
+            logger.debug(traceback.format_exc())
+        
+        import xml.etree.ElementTree as ET
+        root = ET.fromstring(page.content)
+        logger.debug(page.content)
+        tags = {}
+        for child in root.iter():
+            if child.tag.find('strTitle') != -1 :
+                tags['title'] = child.text
+            if child.tag.find('strArtist') != -1 :
+                tags['artist'] = child.text
+            if child.tag.find('strAlbum') != -1 :
+                tags['album'] = child.text
+            
+        return tags
     @staticmethod
     def debugTest():
 
-        #filePath = "/volume1/RcloneDrive/Downloads/offcloud/Music/[ 2020년 1월 1일 - 2020년 1월 4일 신곡 모음 ]/스컬러(SKOLOR) ['19 MATERIA (EP)]/스컬러(SKOLOR) ['19 MATERIA (EP)] - 03 NeeDU:hearts:.mp3"
-        #tags = LogicNormal.getSongTag("1785912", "362766")
+        logger.debug("debugTest")
+        download_path = ModelSetting.get('download_path')
 
-        #LogicNormal.tagUpdateAll(filePath, tags)
-        download_path = "/volume1/RcloneDrive/Downloads/offcloud/Music/"
-        err_path = "/volume1/RcloneDrive/Downloads/offcloud/Music/"
 
-        newFilePath = filePath.replace(os.path.join(download_path),os.path.join(err_path, "ERR"))
-        newFolderPath = os.path.join(newFilePath.replace(os.path.basename(filePath),""))
-        logger.debug("newFilePath : " + newFilePath)
-        logger.debug("newFolderPath : " + newFolderPath)
-        return
-        #logger.debug("file : " + str( file ))
+        filePath = "/app/data/gdriveTeam/share/음악/V/이태원 클라쓰 OST Part.12/01 - Sweet Night.mp3"
+        metadata = mutagen.mp3.Open(filePath)
+        logger.debug("metadata : %s", metadata.tags.getall("USLT")[0].text)
+        logger.debug("===============")
+        filePath = "/app/data/gdriveTeam/share/음악/임재현/조금 취했어/01 - 조금 취했어 (Prod. 2soo).mp3"
+        metadata = mutagen.mp3.Open(filePath)
+        logger.debug("metadata : %s", metadata.tags.getall("USLT")[0].text)
+        """
+        
+        
+        for key in audio.tags.getall():
+            logger.debug("key : %s", key)
+        logger.debug("===============")
+        
+        audio = MP3(filePath)
+        for key in audio.tags.getall():
+            logger.debug("key : %s", key)
+        
+        
+        G:\공유 드라이브\share_dyllis.lev\share\음악\\
+        os.path.join(path, fileName)
+        #LogicNormal.fileList(download_path)
+        
+        for dir_path, dir_names, file_names in os.walk(download_path):
+            rootpath = os.path.join(os.path.abspath(download_path), dir_path)
+            
+            for file in file_names:
+                filepath = os.path.join(rootpath, file)
+                audio = MP3(filepath)
+                for key in audio.tags.keys():
+                    logger.debug("key : %s", key)
+                return
+            return
+        """
+    @staticmethod
+    def fileList(path):
+        filenames = os.listdir(os.path.join(path))
+        for fileName in filenames:
+            if os.path.isdir(os.path.join(path, fileName)):
+                LogicNormal.fileList(os.path.join(path, fileName))
+            else:
+                logger.debug("fileName : %s", os.path.join(path, fileName))
+                audio = MP3(os.path.join(path, fileName))
+                for key in audio.tags.keys():
+                    logger.debug("key : %s", key)
+
+    
         
         
 

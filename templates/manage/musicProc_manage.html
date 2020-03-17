@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid border border-primary rounded py-3">
+  <div class="row row justify-content-md-center">
+    <div class="col-sm-9 input-group mb-3">
+      <div class="input-group-prepend">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">노래</button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="#">노래</a>
+          <a class="dropdown-item" href="#">가수</a>
+          <a class="dropdown-item" href="#">앨범</a>
+          <a class="dropdown-item" href="#">장르</a>
+        </div>
+      </div>
+      <input type="text" class="form-control" aria-label="Text input with dropdown button">
+      <div class="input-group-append">
+        <span class="input-group-text">검색</span>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-2" style="text-align:center; word-break:break-all;">
+      <div id="categoryList" class="list-group">
+        <a class="list-group-item list-group-item-action active" href="#list-item-1" data-id="1">노래</a>
+        <a class="list-group-item list-group-item-action" href="#list-item-2" data-id="2">가수</a>
+        <a class="list-group-item list-group-item-action" href="#list-item-3" data-id="3">앨범</a>
+        <a class="list-group-item list-group-item-action" href="#list-item-4" data-id="4">장르</a>
+      </div>
+    </div>
+    <div class="col list-item-1 content"></div>
+    <div class="col list-item-2 content d-none">
+      가수
+    </div>
+    <div class="col list-item-3 content d-none">
+      앨범
+    </div>
+    <div class="col list-item-4 content d-none">
+      장르
+    </div>
+  </div>
+</div>
+<div class="fixed-bottom bg-light" style="height: 5%;">
+  <div class="progress" style="height: 2px;">
+    <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+  </div>
+  <div class="media">
+    <img src="https://cdnimg.melon.co.kr/cm2/album/images/103/46/650/10346650_500.jpg?14a08050b8c6adc879b6e0cf587d456a/melon/quality/80/optimize" class="align-self-start mr-3 img-thumbnail" style="width:5.5%" alt="corver">
+    <div class="media-body">
+      <h6 class="mt-0">Blueming / 아이유</h6>
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+
+$(document).ready(function(){
+  songAddCard("1");
+});
+
+$(".btn-outline-secondary").mouseover(function(e) {
+  e.preventDefault();
+  $(this).next().addClass("d-block");
+});
+$(".dropdown-menu").mouseleave(function(e) {
+  e.preventDefault();
+  $(this).removeClass('d-block');
+});
+
+
+
+$(".list-group-item").click(function(e) {
+  e.preventDefault();
+  $('.list-group-item').removeClass('active');
+  $('.content').addClass('d-none');
+  $(e.currentTarget).addClass('active');
+  var id = $(e.currentTarget).data("id");
+  $('.list-item-'+id).removeClass('d-none');
+  addCard(id);
+});
+
+$('.container .dropdown-menu > .dropdown-item').click(function(e) {
+  e.preventDefault();
+  $('.btn-outline-secondary').text($(this).text());
+  $(this).parent().removeClass("d-block");
+});
+
+function addCard(id){
+  if( id == "1" ){ //노래
+    songAddCard(id);
+  }
+  if( id == "2" ){ //가수
+    artistAddCard(id);
+  }
+  if( id == "3" ){ //앨범
+    albumAddCard(id);
+  }
+  if( id == "4" ){ //노래
+    genreAddCard(id);
+  }
+}
+function songAddCard(id){
+
+  html = "";
+  for( i = 0 ; i < 100 ; i++ ){
+    html += '<div class="media">';
+    html += ' <img src="https://cdnimg.melon.co.kr/cm2/album/images/103/46/650/10346650_500.jpg?14a08050b8c6adc879b6e0cf587d456a/melon/quality/80/optimize" class="align-self-center mr-3 img-thumbnail" style="width:10.5%" alt="corver">';
+    html += ' <div class="media-body">';
+    html += '   <h5 class="mt-0">Blueming <small class="text-muted">by 아이유</small></h5>';
+    html += '   <p>앨범 : Love poem, 트랙 : 01</br>장르 : 록, 메탈</br>발매 : 2019</p>';
+    html += ' </div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  
+
+  $('.list-item-'+id).html(html);
+  
+}
+function artistAddCard(id){
+
+  html = '<div class="row row-cols-1 row-cols-md-3">';
+  
+  for( i = 0 ; i < 100 ; i++ ){
+    html += '<div class="col-sm-4 mb-4" style="">';
+    html += ' <div class="card h-100">';
+    html += '  <img src="https://cdnimg.melon.co.kr/cm2/album/images/103/46/650/10346650_500.jpg?14a08050b8c6adc879b6e0cf587d456a/melon/quality/80/optimize" class="card-img-top" alt="corver">';
+    html += '  <div class="card-body">';
+    html += '   <h5 class="card-title">아이유</h5>';
+    html += '  </div>';
+    html += '  <div class="card-footer">';
+    html += '   <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>';
+    html += '  </div>';
+    html += ' </div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  
+
+  $('.list-item-'+id).html(html);
+
+}
+function genreAddCard(id){
+  
+}
+
+function albumAddCard(id){
+  
+  html = '<div class="row row-cols-1 row-cols-md-3">';
+  
+  for( i = 0 ; i < 100 ; i++ ){
+    html += '<div class="col-sm-4 mb-4" style="">';
+    html += ' <div class="card h-100">';
+    html += '  <img src="https://cdnimg.melon.co.kr/cm2/album/images/103/46/650/10346650_500.jpg?14a08050b8c6adc879b6e0cf587d456a/melon/quality/80/optimize" class="card-img-top" alt="corver">';
+    html += '  <div class="card-body">';
+    html += '   <h6 class="card-title">Love poem</h6>';
+    html += '   <h7 class="card-text"><small class="text-muted">by </small>아이유</h7>';
+    html += '   <p class="card-text pt-1"><br>';
+    html += '   01. Blueming<br>';
+    html += '   01. Blueming<br>';
+    html += '   01. Blueming<br>';
+    html += '   01. Blueming<br>';
+    html += '   01. Blueming<br>';
+    html += '   01. Blueming<br>';
+    html += '   </p>';
+    html += '  </div>';
+    html += '  <div class="card-footer">';
+    html += '   <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>';
+    html += '  </div>';
+    html += ' </div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  
+
+  $('.list-item-'+id).html(html);
+
+}
+</script>
+{% endblock %}

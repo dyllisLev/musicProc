@@ -36,7 +36,7 @@ blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_na
 menu = {
     'main' : [package_name, '음악정리'],
     'sub' : [
-        ['setting', '설정'], ['list', '목록'], ['log', '로그']
+        ['setting', '설정'], ['list', '목록'], ['manage', '관리'], ['log', '로그']
     ],
     'category' : 'fileprocess'
 }
@@ -80,6 +80,8 @@ def first_menu(sub):
         return render_template('%s_%s.html' % (package_name, sub), arg=arg)
     elif sub == 'list':
         return render_template('%s_%s.html' % (package_name, sub), arg=arg)
+    elif sub == 'manage':
+        return render_template('/manage/%s_%s.html' % (package_name, sub), arg=arg)
     elif sub == 'log':
         return render_template('log.html', package=package_name)
     return render_template('sample.html', title='%s - %s' % (package_name, sub))
