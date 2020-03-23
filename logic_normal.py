@@ -67,6 +67,8 @@ class LogicNormal(object):
             interval = ModelSetting.get('interval')
             emptyFolderDelete = ModelSetting.get('emptyFolderDelete')
             
+            
+            
             #LogicNormal.debugTest()
             #return
             dirList = []
@@ -273,6 +275,8 @@ class LogicNormal(object):
             entity['status'] = "오류"
         elif statusCd == "7":
             entity['status'] = "중복삭제"
+        elif statusCd == "8":
+            entity['status'] = "장르예외"
 
         entity['title'] = title
         entity['artist'] = artist
@@ -352,6 +356,7 @@ class LogicNormal(object):
                 lis = tree.xpath('/html/body/div[1]/form/ul/li')
 
                 match = False
+                isGenreExc = False
 
                 title = ""
                 artist = ""
@@ -480,8 +485,23 @@ class LogicNormal(object):
                                 logger.debug( "테그 정보 업데이트 ")
                                 LogicNormal.tagUpdateAll(file, tags)
                             
-                            realFilePath = LogicNormal.fileMove(file , os.path.join(newFolderPath), os.path.join(newFilePath))
-                            LogicNormal.procSave("1" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
+                            genreExcs = ModelSetting.get('genreExc')
+
+                            for genreExc in genreExcs.split("|"):
+                                logger.debug( "genreExc to genre : %s to %s", genreExc, genre)
+                                if genreExc in genre:
+                                    logger.debug( "genre Match")
+                                    isGenreExc = True
+                            
+                            if isGenreExc:
+                                newFilePath = file.replace(download_path, "")
+                                newFilePath = os.path.join('%s%s%s%s%s' % (err_path, os.path.sep, 'genreExc', os.path.sep, newFilePath)).replace(str(os.path.sep+os.path.sep),str(os.path.sep))
+                                newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
+                                realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
+                                LogicNormal.procSave("8" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
+                            else:
+                                realFilePath = LogicNormal.fileMove(file , os.path.join(newFolderPath), os.path.join(newFilePath))
+                                LogicNormal.procSave("1" , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
                             return
                     
                 if len(lis) < 1 or not match:
@@ -497,6 +517,7 @@ class LogicNormal(object):
                         status = "3"
                     #logger.debug(status)
                     LogicNormal.procSave(status , title, artist, album, titlaByTag, artistByTag, albumByTag, searchKey, realFilePath)
+                
             else:
                 logger.debug("파일존재 미확인")
         else:

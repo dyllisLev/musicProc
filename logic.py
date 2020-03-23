@@ -45,7 +45,8 @@ class Logic(object):
         'isEncoding' : 'True',
         'isEncodingType' : 'MP3,M4A',
         'isDupeDel' : 'False',
-        'isTagUpdate' : 'False'
+        'isTagUpdate' : 'False',
+        'genreExc' : ''
 
     }
 
