@@ -489,9 +489,9 @@ class LogicNormal(object):
 
                             for genreExc in genreExcs.split("|"):
                                 logger.debug( "genreExc to genre : %s to %s", genreExc, genre)
-                                if genreExc in genre:
+                                if len(genreExc) > 0 and genreExc in genre:
                                     logger.debug( "genre Match")
-                                    #isGenreExc = True
+                                    isGenreExc = True
                             
                             if isGenreExc:
                                 newFilePath = file.replace(download_path, "")
