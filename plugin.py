@@ -36,7 +36,7 @@ blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_na
 menu = {
     'main' : [package_name, '음악정리'],
     'sub' : [
-        ['setting', '설정'], ['list', '목록'], ['log', '로그']
+        ['setting', '설정'], ['list', '목록'], ['manage', '관리'], ['log', '로그']
     ],
     'category' : 'fileprocess'
 }
