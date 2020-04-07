@@ -69,8 +69,8 @@ class LogicNormal(object):
             
             
             
-            #LogicNormal.debugTest()
-            #return
+            LogicNormal.debugTest()
+            return
             dirList = []
             fileList = []
             
@@ -444,6 +444,8 @@ class LogicNormal(object):
                         else:
                             fileRenameSet = os.path.basename(file)
                         
+                        extTmp = fileRenameSet.split(".")[-1].lower()
+                        fileRenameSet = fileRenameSet.replace(fileRenameSet.split(".")[-1],extTmp)
                         logger.debug("folderStructure : %s", folderStructure)
                         logger.debug("fileRenameSet : %s", fileRenameSet)
                         logger.debug("os.path.sep : %s", os.path.sep)
@@ -857,55 +859,18 @@ class LogicNormal(object):
     @staticmethod
     def debugTest():
 
-        logger.debug("debugTest")
-        download_path = ModelSetting.get('download_path')
+        """
+        filePath = "/app/data/music"
+        rtn = subprocess.check_output (['find', os.path.join(filePath), '-type', 'f'])
+        
+        for filename in rtn.split("\n"):
+            if len(filename) > 1:
+                logger.debug( "1 : %s", filename )
+        from rclone.model import Modeltem
+        """
 
 
-        filePath = "/app/data/gdriveTeam/share/음악/V/이태원 클라쓰 OST Part.12/01 - Sweet Night.mp3"
-        metadata = mutagen.mp3.Open(filePath)
-        logger.debug("metadata : %s", metadata.tags.getall("USLT")[0].text)
-        logger.debug("===============")
-        filePath = "/app/data/gdriveTeam/share/음악/임재현/조금 취했어/01 - 조금 취했어 (Prod. 2soo).mp3"
-        metadata = mutagen.mp3.Open(filePath)
-        logger.debug("metadata : %s", metadata.tags.getall("USLT")[0].text)
-        """
         
-        
-        for key in audio.tags.getall():
-            logger.debug("key : %s", key)
-        logger.debug("===============")
-        
-        audio = MP3(filePath)
-        for key in audio.tags.getall():
-            logger.debug("key : %s", key)
-        
-        
-        G:\공유 드라이브\share_dyllis.lev\share\음악\\
-        os.path.join(path, fileName)
-        #LogicNormal.fileList(download_path)
-        
-        for dir_path, dir_names, file_names in os.walk(download_path):
-            rootpath = os.path.join(os.path.abspath(download_path), dir_path)
-            
-            for file in file_names:
-                filepath = os.path.join(rootpath, file)
-                audio = MP3(filepath)
-                for key in audio.tags.keys():
-                    logger.debug("key : %s", key)
-                return
-            return
-        """
-    @staticmethod
-    def fileList(path):
-        filenames = os.listdir(os.path.join(path))
-        for fileName in filenames:
-            if os.path.isdir(os.path.join(path, fileName)):
-                LogicNormal.fileList(os.path.join(path, fileName))
-            else:
-                logger.debug("fileName : %s", os.path.join(path, fileName))
-                audio = MP3(os.path.join(path, fileName))
-                for key in audio.tags.keys():
-                    logger.debug("key : %s", key)
 
     
         
