@@ -69,8 +69,8 @@ class LogicNormal(object):
             
             
             
-            LogicNormal.debugTest()
-            return
+            #LogicNormal.debugTest()
+            #return
             dirList = []
             fileList = []
             
