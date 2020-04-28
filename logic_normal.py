@@ -419,7 +419,7 @@ class LogicNormal(object):
                         album = tags['album']
                         album = album.replace("/",",")
                         #트랙
-                        track = str(int(tags['track']))
+                        track = tags['track']
                         #발매년도
                         year = tags['year']
                         #장르
