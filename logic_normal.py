@@ -109,7 +109,7 @@ class LogicNormal(object):
                 for dir_path in dirList:
                     logger.debug( "dir_path : " + dir_path)
                     if download_path != dir_path and len(os.listdir(dir_path)) == 0:
-                        os.rmdir(unicode(dir_path))
+                        os.rmdir(dir_path)
 
             logger.debug("===============END=================")
         except Exception as e:
@@ -147,9 +147,9 @@ class LogicNormal(object):
             if ext.upper() == "MP3":
                 try:
                     tags = ID3(filePath)
-                    tags.add(TALB(text=[unicode(str(album))]))
-                    tags.add(TIT2(text=[unicode(str(title))]))
-                    tags.add(TPE1(text=[unicode(str(artist))]))
+                    tags.add(TALB(text=[album]))
+                    tags.add(TIT2(text=[title]))
+                    tags.add(TPE1(text=[artist]))
                     tags.save()
                 except ID3NoHeaderError:
                     logger.debug("MP3 except")
@@ -157,18 +157,18 @@ class LogicNormal(object):
             if "M4A" == ext.upper() :
                 
                 tags = MP4(filePath)
-                tags['\xa9nam'][0] = unicode(str(title))
-                tags['\xa9ART'][0] = unicode(str(artist))
-                tags['\xa9alb'][0] = unicode(str(album))
+                tags['\xa9nam'][0] = title
+                tags['\xa9ART'][0] = artist
+                tags['\xa9alb'][0] = album
                 tags.save()
                 
                 
             if "FLAC" == ext.upper() :
 
                 tags = FLAC(filePath)
-                tags['title'] = unicode(str(title))
-                tags['artist'] = unicode(str(artist))
-                tags['album'] = unicode(str(album))
+                tags['title'] = str(title)
+                tags['artist'] = str(artist)
+                tags['album'] = str(album)
                 tags.save()
                 
             logger.debug("파일처리시작"  + filePath)
@@ -344,7 +344,7 @@ class LogicNormal(object):
                 
                 #목록검색
                 url = 'https://m.app.melon.com/search/mobile4web/searchsong_list.htm?cpId=WP10&cpKey=&memberKey=0&keyword='
-                url = '%s%s' % (url, urllib.quote(searchKey.encode('utf8')))
+                url = '%s%s' % (url, urllib.parse.quote(searchKey.encode('utf8')))
                 
                 logger.debug( "url : " + url)
 
@@ -570,7 +570,7 @@ class LogicNormal(object):
         allTag = {}
 
         url = 'https://m.app.melon.com/song/detail.htm?songId='
-        url = '%s%s' % (url, urllib.quote(songId))
+        url = '%s%s' % (url, urllib.parse.quote(songId))
         
         data = LogicNormal.get_html(url)
         tree = html.fromstring(data)
@@ -606,7 +606,7 @@ class LogicNormal(object):
 
         
         url = 'https://m.app.melon.com/album/music.htm?albumId='
-        url = '%s%s' % (url, urllib.quote(albumId))
+        url = '%s%s' % (url, urllib.parse.quote(albumId))
         
         data = LogicNormal.get_html(url)
         tree = html.fromstring(data)
@@ -690,7 +690,7 @@ class LogicNormal(object):
         #가사
         try:
             url = 'https://m.app.melon.com/song/lyrics.htm?songId='
-            url = '%s%s' % (url, urllib.quote(songId))
+            url = '%s%s' % (url, urllib.parse.quote(songId))
             
             data = LogicNormal.get_html(url)
             tree = html.fromstring(data)
@@ -738,12 +738,12 @@ class LogicNormal(object):
             if ext.upper() == "MP3":
                 try:
                     audio = ID3(filePath)
-                    audio.add(TALB(text=[unicode(album)]))
-                    audio.add(TIT2(text=[unicode(title)]))
-                    audio.add(TPE1(text=[unicode(artist)]))
-                    audio.add(TRCK(text=[unicode(track)]))
-                    audio.add(TYER(text=[unicode(year)]))
-                    audio.add(TCON(text=[unicode(genre)]))
+                    audio.add(TALB(text=[album]))
+                    audio.add(TIT2(text=[title]))
+                    audio.add(TPE1(text=[artist]))
+                    audio.add(TRCK(text=[track]))
+                    audio.add(TYER(text=[year]))
+                    audio.add(TCON(text=[genre]))
                     audio.add(USLT(text=lyrics, lang="kor", desc=""))
                     
                     from PIL import Image
@@ -771,13 +771,13 @@ class LogicNormal(object):
                 except ID3NoHeaderError:
                     logger.debug("MP3 except")
                     audio = ID3()
-                    audio.add(TALB(text=[unicode(album)]))
-                    audio.add(TIT2(text=[unicode(title)]))
-                    audio.add(TPE1(text=[unicode(artist)]))
-                    audio.add(TRCK(text=[unicode(track)]))
-                    audio.add(TYER(text=[unicode(year)]))
-                    audio.add(TCON(text=[unicode(genre)]))
-                    audio.add(USLT(text=[unicode(str(lyrics))], lang="kor", desc=""))
+                    audio.add(TALB(text=[album]))
+                    audio.add(TIT2(text=[title]))
+                    audio.add(TPE1(text=[artist]))
+                    audio.add(TRCK(text=[track]))
+                    audio.add(TYER(text=[year]))
+                    audio.add(TCON(text=[genre]))
+                    audio.add(USLT(text=[lyrics], lang="kor", desc=""))
                     from PIL import Image
                     import requests
 
@@ -797,7 +797,7 @@ class LogicNormal(object):
         import hashlib, codecs
         md5 = hashlib.md5()
         logger.debug('file2md5 filename %s' % filename)
-        filename = unicode(filename)
+        filename = str(filename)
         f = open(filename, 'rb')
         tag = f.read(3)
         if tag == 'ID3':
