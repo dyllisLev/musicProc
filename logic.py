@@ -77,8 +77,8 @@ class Logic(object):
             if ModelSetting.get_bool('auto_start'):
                 Logic.scheduler_start()
             # 편의를 위해 json 파일 생성
-            from plugin import plugin_info
-            Util.save_from_dict_to_json(plugin_info, os.path.join(os.path.dirname(__file__), 'info.json'))
+            # from plugin import plugin_info
+            # Util.save_from_dict_to_json(plugin_info, os.path.join(os.path.dirname(__file__), 'info.json'))
 
             
             

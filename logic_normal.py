@@ -420,6 +420,7 @@ class LogicNormal(object):
                         album = album.replace("/",",")
                         #트랙
                         track = tags['track']
+                        logger.debug( "tags['track'] : " + tags['track']  + "|| track : " + track )
                         #발매년도
                         year = tags['year']
                         #장르
@@ -624,19 +625,15 @@ class LogicNormal(object):
         try:
             track = "00"
             lis = tree.xpath('/html/body/div[1]/article/div[2]/ul/li')
+            
             from lxml.etree import tostring as htmlstring
+            logger.debug("lis : %d" ,  len(lis))
             
             if len(lis) == 1:
                 p = tree.xpath('/html/body/div[1]/article/div[2]/ul/li/div[2]/div/a/p')[0]
-                pHtml = htmlstring(p, encoding='utf8')
-                pHtml = pHtml.replace('<p class="title ellipsis">',"")
-                pHtml = pHtml.replace('&#13;',"")
-                pHtml = pHtml.replace('<span class="sprite title hide">',"")
+                pHtml = p.text_content().strip()
                 pHtml = pHtml.replace('타이틀',"")
-                pHtml = pHtml.replace('</span>',"")
-                pHtml = pHtml.replace('</p>',"")
                 p = pHtml.strip()
-
                 if p == title:
                     div = tree.xpath('/html/body/div[1]/article/div[2]/ul/li/div[1]')[0]
                     track = div.text_content().strip()
@@ -644,24 +641,21 @@ class LogicNormal(object):
             else:
                 for i in range(0, len(lis)):
                     cnt = i + 1
+                    logger.debug("i : %d", i)
                     p = tree.xpath('/html/body/div[1]/article/div[2]/ul/li[%s]/div[2]/div/a/p' % cnt)[0]
                     span = tree.xpath('/html/body/div[1]/article/div[2]/ul/li[%s]/div[2]/div/a/p/span' % cnt)
+                    
                     if len(span) == 1:
-                        pHtml = htmlstring(p, encoding='utf8')
-                        pHtml = pHtml.replace('<p class="title ellipsis">',"")
-                        pHtml = pHtml.replace('&#13;',"")
-                        pHtml = pHtml.replace('<span class="sprite title hide">',"")
+                        pHtml = p.text_content().strip()
                         pHtml = pHtml.replace('타이틀',"")
-                        pHtml = pHtml.replace('</span>',"")
-                        pHtml = pHtml.replace('</p>',"")
                         p = pHtml.strip()
                     else:
                         p = p.text.strip() 
-
+                    
                     if p == title:
                         div = tree.xpath('/html/body/div[1]/article/div[2]/ul/li[%s]/div[1]' % cnt)[0]
                         track = div.text_content().strip()
-                    
+                
             allTag['track'] = track
         except Exception as e:
             allTag['track'] = ""
