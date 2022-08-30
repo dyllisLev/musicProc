@@ -427,6 +427,8 @@ class LogicNormal(object):
                         genre = tags['genre']
                         genre = genre.replace("/",",")
 
+                        # logger.debug( tags )
+                        
                         folderStructure = folderStructure.replace('%title%', title)
                         folderStructure = folderStructure.replace('%artist%', artist)
                         folderStructure = folderStructure.replace('%album%', album)
@@ -578,7 +580,8 @@ class LogicNormal(object):
 
         #제목
         try:
-            h1 = tree.xpath('/html/body/div[1]/article/div[2]/div/h1')[0]
+            h1 = tree.xpath('/html/body/div[1]/main/div[1]/div/div[2]/div[2]/h2')[0]
+                             
             title = h1.text.strip()
             allTag['title'] = title
         except Exception as e:
@@ -588,7 +591,7 @@ class LogicNormal(object):
         #아티스트
         try:
             artist = ""
-            p = tree.xpath('/html/body/div[1]/article/div[2]/div/p')[0]
+            p = tree.xpath('/html/body/div[1]/main/div[1]/div/div[2]/div[3]/div/a/div[2]/span/span')[0]
             artist = p.text.strip()
             allTag['artist'] = artist
         except Exception as e:
@@ -597,7 +600,7 @@ class LogicNormal(object):
 
         #장르
         try:
-            span = tree.xpath('/html/body/div[1]/article/div[2]/ul/li[1]/span[2]')[0]
+            span = tree.xpath('/html/body/div[1]/main/div[2]/div[2]/div[2]/dl/div[4]/dd/div')[0]
             genre = span.text.strip()
             allTag['genre'] = genre
         except Exception as e:
@@ -612,7 +615,7 @@ class LogicNormal(object):
         data = LogicNormal.get_html(url)
         tree = html.fromstring(data)
 
-        p = tree.xpath('/html/body/section/div[2]/div[1]/div/div[2]/p[2]')
+        p = tree.xpath('/html/body/div[1]/main/div[2]/div[2]/div[2]/dl/div[3]/dd/div')
         #제작년도
         try:
             year = p[0].text[:4]
@@ -664,7 +667,7 @@ class LogicNormal(object):
         #앨범이미지
         try:
             albumImage = ""
-            meta = tree.xpath('/html/head/meta[6]')[0]
+            meta = tree.xpath('/html/head/meta[7]')[0]
             albumImage = meta.attrib.get("content")
             allTag['albumImage'] = albumImage
         except Exception as e:
@@ -674,7 +677,8 @@ class LogicNormal(object):
         #앨범
         try:
             album = ""
-            p = tree.xpath('/html/body/section/div[2]/div[1]/div/div[2]/p[1]')[0]
+            
+            p = tree.xpath('/html/body/div[1]/main/div[1]/div[2]/div[1]/div/h2')[0]
             album = p.text.strip()
             allTag['album'] = album
         except Exception as e:
@@ -689,16 +693,22 @@ class LogicNormal(object):
             data = LogicNormal.get_html(url)
             tree = html.fromstring(data)
             
-            div = tree.xpath('/html/body/div[1]/article/div[2]/div[2]')[0]
-            lyrics = htmlstring(div, encoding='utf8')
+            div = tree.xpath('/html/body/div[1]/main/div[2]/div[1]/div[2]/div/div[1]/div')[0]
+            # logger.debug("가사")
+            # logger.debug(div)
+            
+            lyrics = htmlstring(div, encoding='utf8').decode('utf-8')
+            # logger.debug(type(lyrics))
+            
             lyrics = lyrics.replace('<div class="lyrics">',"")
             lyrics = lyrics.replace("&#13;","")
             lyrics = lyrics.replace("</div>","")
             lyrics = lyrics.replace("<br/>","\n").strip()
+            # logger.debug(lyrics)
             allTag['lyrics'] = lyrics
         except Exception as e:
             allTag['lyrics'] = ""
-        #logger.debug( "가사 : " + lyrics )
+            # logger.debug( "가사 : " + e )
 
         return allTag
 
@@ -850,8 +860,12 @@ class LogicNormal(object):
                 tags['album'] = child.text
             
         return tags
-    @staticmethod
-    def debugTest():
+    # @staticmethod
+    # def test(test):
+    #     logger.debug( "album \n: " + test )
+        
+    # @staticmethod
+    # def debugTest():
 
         """
         filePath = "/app/data/music"

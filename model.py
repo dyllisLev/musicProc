@@ -23,7 +23,7 @@ app.config['SQLALCHEMY_BINDS'][package_name] = 'sqlite:///%s' % (os.path.join(pa
 #########################################################
         
 class ModelSetting(db.Model):
-    __tablename__ = '%s_setting' % package_name
+    __tablename__ = '%s_setting' % package_name 
     __table_args__ = {'mysql_collate': 'utf8_general_ci'}
     __bind_key__ = package_name
 
