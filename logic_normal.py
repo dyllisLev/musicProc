@@ -627,38 +627,16 @@ class LogicNormal(object):
         #트랙
         try:
             track = "00"
-            lis = tree.xpath('/html/body/div[1]/article/div[2]/ul/li')
-            
-            from lxml.etree import tostring as htmlstring
-            logger.debug("lis : %d" ,  len(lis))
-            
-            if len(lis) == 1:
-                p = tree.xpath('/html/body/div[1]/article/div[2]/ul/li/div[2]/div/a/p')[0]
-                pHtml = p.text_content().strip()
-                pHtml = pHtml.replace('타이틀',"")
-                p = pHtml.strip()
-                if p == title:
-                    div = tree.xpath('/html/body/div[1]/article/div[2]/ul/li/div[1]')[0]
-                    track = div.text_content().strip()
-                
-            else:
-                for i in range(0, len(lis)):
-                    cnt = i + 1
-                    logger.debug("i : %d", i)
-                    p = tree.xpath('/html/body/div[1]/article/div[2]/ul/li[%s]/div[2]/div/a/p' % cnt)[0]
-                    span = tree.xpath('/html/body/div[1]/article/div[2]/ul/li[%s]/div[2]/div/a/p/span' % cnt)
-                    
-                    if len(span) == 1:
-                        pHtml = p.text_content().strip()
-                        pHtml = pHtml.replace('타이틀',"")
-                        p = pHtml.strip()
-                    else:
-                        p = p.text.strip() 
-                    
-                    if p == title:
-                        div = tree.xpath('/html/body/div[1]/article/div[2]/ul/li[%s]/div[1]' % cnt)[0]
-                        track = div.text_content().strip()
-                
+            divs = tree.xpath( '/html/body/div[1]/main/div[2]/div[1]/div/ul/li/div/div')
+            # logger.debug( "debug test : %s" % songId )
+            for div in divs:
+                for a in list(div):
+                    if a.attrib.get('href') != None:
+                        if songId in a.attrib.get('href'):
+                            for it in div.iter('span'):
+                                if 'num-track' in it.attrib.get('class'): 
+                                    track = it.text
+                                    
             allTag['track'] = track
         except Exception as e:
             allTag['track'] = ""
