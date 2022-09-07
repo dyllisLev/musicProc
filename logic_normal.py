@@ -591,12 +591,16 @@ class LogicNormal(object):
         #아티스트
         try:
             artist = ""
-            p = tree.xpath('/html/body/div[1]/main/div[1]/div/div[2]/div[3]/div/a/div[2]/span/span')[0]
-            artist = p.text.strip()
+            div = tree.xpath('/html/body/div[1]/main/div[1]/div/div[2]/div[3]/div')[0]
+            userName = div.find_class("user-name")
+            artist = userName[0].text.strip()
+            # logger.debug( userName )
+            # logger.debug( userName[0].text.strip() )
+            # artist = p.text.strip()
             allTag['artist'] = artist
         except Exception as e:
             allTag['artist'] = ""
-        #logger.debug( "아티스트 : " + artist )
+        logger.debug( "아티스트 : " + artist )
 
         #장르
         try:
