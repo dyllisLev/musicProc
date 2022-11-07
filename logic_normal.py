@@ -24,6 +24,8 @@ from mutagen.mp4 import MP4
 from mutagen.flac import FLAC
 import mutagen
 import platform
+import asyncio
+from shazamio import Shazam
 
 
 
@@ -154,6 +156,10 @@ class LogicNormal(object):
                 except ID3NoHeaderError:
                     logger.debug("MP3 except")
                     tags = ID3()
+                    tags.add(TALB(text=[album]))
+                    tags.add(TIT2(text=[title]))
+                    tags.add(TPE1(text=[artist]))
+                    tags.save(filePath)
             if "M4A" == ext.upper() :
                 
                 tags = MP4(filePath)
@@ -181,7 +187,32 @@ class LogicNormal(object):
         else:
             return      
         
+    @staticmethod
+    def shazam_tag(req):
+
+        if 'filePath' in req.form:
+            filePath = req.form['filePath']
         
+
+        logger.debug( filePath )
+        ret = {}
+
+        if os.path.isfile(filePath):
+            logger.debug("파일존재 확인"  + filePath)
+            shazamTagInfo = None
+            shazamTagInfo = LogicNormal.findChazam(filePath)
+            
+            if shazamTagInfo == None:
+                ret = {'result':'False'}
+            else:
+                titlaByTag = shazamTagInfo['title'].upper().strip()
+                artistByTag = shazamTagInfo['artist'].upper().strip()
+                albumByTag = shazamTagInfo['album'].upper().strip()
+                ret = {'title':titlaByTag, 'artist':artistByTag, 'album':albumByTag, 'result':'True'}
+        else:
+            ret = {'result':'False'}
+        
+        return ret
 
     @staticmethod
     def get_html(url, referer=None, stream=False):
@@ -320,18 +351,30 @@ class LogicNormal(object):
                 tags = LogicNormal.getTagInfo(file)
                 
                 if tags == {} :
+                    
+                    shazamTagInfo = None
 
-                    newFilePath = file.replace(download_path, "")
-                    newFilePath = os.path.join('%s%s%s%s%s' % (err_path, os.path.sep, 'nonTAG', os.path.sep, newFilePath)).replace(str(os.path.sep+os.path.sep),str(os.path.sep))
-                    newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
-                    realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
+                    if ModelSetting.get_bool('isShazam') :
+                        shazamTagInfo = LogicNormal.findChazam(file)
 
-                    LogicNormal.procSave("4" , "", "", "", "", "", "", "", realFilePath)
-                    return
-                
-                titlaByTag = tags['titlaByTag']
-                artistByTag = tags['artistByTag']
-                albumByTag = tags['albumByTag']
+                    if shazamTagInfo == None:
+                        logger.debug("NO TAG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                        newFilePath = file.replace(download_path, "")
+                        newFilePath = os.path.join('%s%s%s%s%s' % (err_path, os.path.sep, 'nonTAG', os.path.sep, newFilePath)).replace(str(os.path.sep+os.path.sep),str(os.path.sep))
+                        newFolderPath = os.path.join(newFilePath.replace(os.path.basename(file),""))
+                        realFilePath = LogicNormal.fileMove(file , newFolderPath, newFilePath)
+
+                        LogicNormal.procSave("4" , "", "", "", "", "", "", "", realFilePath)
+                        return
+                    else:
+                        titlaByTag = shazamTagInfo['title'].upper().strip()
+                        artistByTag = shazamTagInfo['artist'].upper().strip()
+                        albumByTag = shazamTagInfo['album'].upper().strip()
+                    
+                else:
+                    titlaByTag = tags['titlaByTag']
+                    artistByTag = tags['artistByTag']
+                    albumByTag = tags['albumByTag']
 
                 logger.debug( "titlaByTag : " + titlaByTag)
                 logger.debug( "artistByTag : " + artistByTag)
@@ -842,26 +885,39 @@ class LogicNormal(object):
                 tags['album'] = child.text
             
         return tags
-    # @staticmethod
-    # def test(test):
-    #     logger.debug( "album \n: " + test )
+    
+    @staticmethod
+    async def shazamFind(mp3Path):
         
-    # @staticmethod
-    # def debugTest():
-
-        """
-        filePath = "/app/data/music"
-        rtn = subprocess.check_output (['find', os.path.join(filePath), '-type', 'f'])
+        shazam = Shazam()
+        out = await shazam.recognize_song(mp3Path)
+        return out
+    
+    @staticmethod
+    def findChazam(mp3Path=None):
         
-        for filename in rtn.split("\n"):
-            if len(filename) > 1:
-                logger.debug( "1 : %s", filename )
-        from rclone.model import Modeltem
-        """
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError as e:
+            if str(e).startswith('There is no current event loop in thread'):
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            else:
+                raise
 
 
-        
-
+        print( mp3Path )
+        out = loop.run_until_complete(LogicNormal.shazamFind(mp3Path))
+        if len(out['matches']) > 0 :
+            album = ''
+            trackInfo = out['track']
+            metadata = trackInfo['sections'][0]['metadata']
+            for i in metadata:
+                if i['title'] == 'Album':
+                    album = i['text']
+            return {'title':trackInfo['title'], 'artist':trackInfo['subtitle'], 'album':album}
+        else:
+            return None
     
         
         

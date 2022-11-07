@@ -23,6 +23,16 @@ try:
 except:
     os.system("pip install mutagen")
     from .logic_normal import LogicNormal
+
+try:
+    import asyncio
+    from shazamio import Shazam
+except:
+    os.system("pip install shazamio")
+    import asyncio
+    from shazamio import Shazam
+
+
 #from .logic_normal import LogicNormal
 #########################################################
 
@@ -46,7 +56,8 @@ class Logic(object):
         'isEncodingType' : 'MP3,M4A',
         'isDupeDel' : 'False',
         'isTagUpdate' : 'False',
-        'genreExc' : ''
+        'genreExc' : '',
+        'isShazam' : 'False'
 
     }
 
@@ -58,9 +69,6 @@ class Logic(object):
                     db.session.add(ModelSetting(key, value))
             db.session.commit()
             
-            
-
-
             Logic.migration()
         except Exception as e: 
             logger.error('Exception:%s', e)

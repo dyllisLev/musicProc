@@ -32,8 +32,8 @@
       {{ macros.setting_input_text('isEncodingType', '인코딩변경 타입', value=arg['isEncodingType'], desc=['인코딩변경 여부가 ON일때 해당하는 타입은 인코딩변경을 하고 작업이 시작됩니다.']) }}
       {{ macros.setting_checkbox('isDupeDel', '중복파일 삭제', value=arg['isDupeDel'], desc='On : 중복파일인 경우 파일 삭제') }}
       {{ macros.setting_input_text('genreExc', '장르예외처리', value=arg['genreExc'], desc=['음원이 입력한 장르에 속하면 예외처리 합니다.','구분자 |']) }}
+      {{ macros.setting_checkbox('isShazam', 'Shazam 검색 사용', value=arg['isShazam'], desc=['On : 음원에 TAG가 없을때 Shazam 검색을 통해 음원정보를 검색합니다.','Off 후  NoTAG 수동작업을 추천합니다.']) }}
       
-
       {{ macros.setting_button([['global_reset_db_btn', '목록 초기화']], left='DB정리' ) }}
     {{ macros.m_tab_content_end() }}
     {{ macros.m_tab_content_start('auto', false) }}

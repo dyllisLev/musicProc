@@ -122,6 +122,10 @@ def ajax(sub):
             from .logic_normal import LogicNormal
             ret = LogicNormal.tagUpdate(request)
             return jsonify(ret)
+        elif sub == 'shazam_tag':
+            from .logic_normal import LogicNormal
+            ret = LogicNormal.shazam_tag(request)
+            return jsonify(ret)
             
     except Exception as e: 
         logger.error('Exception:%s', e)
