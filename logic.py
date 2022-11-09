@@ -19,18 +19,20 @@ from .plugin import logger, package_name
 from .model import ModelSetting, ModelItem
 
 try:
-    from .logic_normal import LogicNormal
-except:
-    os.system("pip install mutagen")
-    from .logic_normal import LogicNormal
-
-try:
     import asyncio
     from shazamio import Shazam
 except:
     os.system("pip install shazamio")
     import asyncio
     from shazamio import Shazam
+    
+try:
+    from .logic_normal import LogicNormal
+except:
+    os.system("pip install mutagen")
+    from .logic_normal import LogicNormal
+
+
 
 
 #from .logic_normal import LogicNormal
